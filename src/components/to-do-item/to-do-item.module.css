@@ -1,0 +1,15 @@
+.item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.text {
+    flex-grow: 1;
+}
+
+.done {
+    text-decoration: line-through;
+    color: green;
+}

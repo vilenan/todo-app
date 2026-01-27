@@ -1,33 +1,71 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import { useState, useEffect } from 'react';
+import styles from './App.module.css';
+import Button from './components/button/button';
+import TodoList from './components/to-do-list/to-do-list';
+
+// Todo = { id: number, text: string, completed: boolean }
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [todos, setTodos] = useState(() => {
+    const saved = localStorage.getItem('todos');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [text, setText] = useState('');
+
+  useEffect(() => {
+    (localStorage.setItem('todos', JSON.stringify(todos)), [todos]);
+  });
+
+  function addTodos(text) {
+    setTodos([...todos, { id: Date.now(), text: text, completed: false }]);
+  }
+
+  function removeTask(id) {
+    setTodos(todos.filter((item) => item.id !== id));
+  }
+
+  function toggleTodo(id) {
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!text.trim()) return;
+    addTodos(text);
+    setText('');
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+      <div className={styles.container}>
+        <h1 className={styles.title}>Создай удобный список дел</h1>
+
+        <p className={styles.slogan}>
+          Фиксируй задачи. Помогаем выполнять запланированное без хаоса и лишних
+          усилий.
         </p>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Введите задачу"
+            className={styles.input}
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+            }}
+          />
+          <Button type="submit">Добавить задачу</Button>
+        </form>
+
+        <TodoList todos={todos} onRemove={removeTask} onToggle={toggleTodo} />
+
+        <p>Всего задач: {todos.length}</p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   );
 }
