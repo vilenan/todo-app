@@ -13,8 +13,8 @@ function App() {
   const [text, setText] = useState('');
 
   useEffect(() => {
-    (localStorage.setItem('todos', JSON.stringify(todos)), [todos]);
-  });
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
 
   function addTodos(text) {
     setTodos([...todos, { id: Date.now(), text: text, completed: false }]);
@@ -59,7 +59,7 @@ function App() {
               setText(e.target.value);
             }}
           />
-          <Button type="submit">Добавить задачу</Button>
+          <Button type="submit">Добавить</Button>
         </form>
 
         <TodoList todos={todos} onRemove={removeTask} onToggle={toggleTodo} />
