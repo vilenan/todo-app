@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import styles from './App.module.css';
 import Button from './components/button/button';
 import TodoList from './components/to-do-list/to-do-list';
-
-// Todo = { id: number, text: string, completed: boolean }
+import type { ITodo } from './types/ITodo';
+import type { ITodoItem } from './components/to-do-item/to-do-item';
 
 function App() {
   const [todos, setTodos] = useState(() => {
@@ -11,28 +11,37 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [text, setText] = useState('');
+  //Добавила состояние фильтра
+  type FilterType = 'all' | 'active' | 'completed';
+  const [filter, setFilter] = useState<FilterType>('all');
+
+  const filteredTodos = todos.filter((todo: ITodo) => {
+    if (filter === 'active') return !todo.completed;
+    if (filter === 'completed') return todo.completed;
+    return true;
+  });
 
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
 
-  function addTodos(text) {
+  function addTodos(text: string) {
     setTodos([...todos, { id: Date.now(), text: text, completed: false }]);
   }
 
-  function removeTask(id) {
-    setTodos(todos.filter((item) => item.id !== id));
+  function removeTask(id: number) {
+    setTodos(todos.filter((item: ITodoItem) => item.id !== id));
   }
 
-  function toggleTodo(id) {
+  function toggleTodo(id: number) {
     setTodos(
-      todos.map((todo) =>
+      todos.map((todo: ITodo) =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
       )
     );
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!text.trim()) return;
     addTodos(text);
@@ -62,9 +71,27 @@ function App() {
           <Button type="submit">Добавить</Button>
         </form>
 
-        <TodoList todos={todos} onRemove={removeTask} onToggle={toggleTodo} />
+        <TodoList
+          todos={filteredTodos}
+          onRemove={removeTask}
+          onToggle={toggleTodo}
+        />
 
         <p>Всего задач: {todos.length}</p>
+        <div className={styles.controls}>
+          <button className={styles.button} onClick={() => setFilter('all')}>
+            Все
+          </button>
+          <button className={styles.button} onClick={() => setFilter('active')}>
+            Активные
+          </button>
+          <button
+            className={styles.button}
+            onClick={() => setFilter('completed')}
+          >
+            Выполненные
+          </button>
+        </div>
       </div>
     </>
   );
