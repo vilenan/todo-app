@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import styles from './App.module.css';
 import Button from './components/button/button';
+import TodoForm from './components/todo-form/todo-form';
 import TodoList from './components/to-do-list/to-do-list';
 import type { ITodo } from './types/ITodo';
 import type { ITodoItem } from './types/ITodoItem';
@@ -141,6 +142,18 @@ function App() {
 
   const isSubmitDisabled = Boolean(validateText(text));
 
+  function handleTextChange(value: string) {
+    setText(value);
+    if (touched) {
+      setError(validateText(value));
+    }
+  }
+
+  function handleTextBlur() {
+    setTouched(true);
+    setError(validateText(text));
+  }
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const nextError = validateText(text);
@@ -188,22 +201,18 @@ function App() {
           onEdit={handleEdit}
         />
 
-        <p>Всего задач: {todos.length}</p>
-        <p>Активных задач: {activeCount}</p>
-        <p>Выполненных задач: {doneCount}</p>
-
         <div className={styles.controls}>
           <button className={styles.button} onClick={() => setFilter('all')}>
-            Все
+            Все {todos.length}
           </button>
           <button className={styles.button} onClick={() => setFilter('active')}>
-            Активные
+            Активные {activeCount}
           </button>
           <button
             className={styles.button}
             onClick={() => setFilter('completed')}
           >
-            Выполненные
+            Выполненные {doneCount}
           </button>
         </div>
 
@@ -224,67 +233,21 @@ function App() {
                 </button>
               </div>
 
-              <form className={styles.modalForm} onSubmit={handleSubmit}>
-                <label className={styles.label}>
-                  Текст задачи
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    placeholder="Например: оплатить счета"
-                    className={`${styles.input} ${
-                      error ? styles.inputError : ''
-                    }`}
-                    value={text}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setText(value);
-                      if (touched) {
-                        setError(validateText(value));
-                      }
-                    }}
-                    onBlur={() => {
-                      setTouched(true);
-                      setError(validateText(text));
-                    }}
-                  />
-                </label>
-
-                <label className={styles.label}>
-                  Описание
-                  <textarea
-                    placeholder="Коротко опиши, что нужно сделать"
-                    className={styles.textarea}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={3}
-                  />
-                </label>
-
-                <label className={styles.label}>
-                  Срок выполнения
-                  <input
-                    type="date"
-                    className={styles.input}
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                  />
-                </label>
-
-                {error && <p className={styles.error}>{error}</p>}
-
-                <div className={styles.modalActions}>
-                  <button
-                    type="button"
-                    className={styles.secondaryButton}
-                    onClick={closeModal}
-                  >
-                    Отмена
-                  </button>
-                  <Button type="submit" disabled={isSubmitDisabled}>
-                    {editingId !== null ? 'Сохранить' : 'Добавить'}
-                  </Button>
-                </div>
-              </form>
+              <TodoForm
+                text={text}
+                description={description}
+                dueDate={dueDate}
+                error={error}
+                isSubmitDisabled={isSubmitDisabled}
+                submitLabel={editingId !== null ? 'Сохранить' : 'Добавить'}
+                onSubmit={handleSubmit}
+                onCancel={closeModal}
+                onTextChange={handleTextChange}
+                onTextBlur={handleTextBlur}
+                onDescriptionChange={setDescription}
+                onDueDateChange={setDueDate}
+                inputRef={inputRef}
+              />
             </div>
           </div>
         )}

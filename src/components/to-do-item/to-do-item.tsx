@@ -15,14 +15,17 @@ export function TodoItem({
 }: ITodoItem) {
   return (
     <div className={styles.item}>
-      <input
-        type="checkbox"
-        checked={completed}
-        onChange={() => {
-          console.log('переключаем', id, onToggle);
-          onToggle(id);
-        }}
-      />
+      <label className={styles.checkbox}>
+        <input
+          type="checkbox"
+          checked={completed}
+          onChange={() => {
+            console.log('переключаем', id, onToggle);
+            onToggle(id);
+          }}
+        />
+        <span className={styles.checkboxBox} aria-hidden="true" />
+      </label>
       <div className={styles.content}>
         <span className={`${styles.text} ${completed ? styles.done : ''}`}>
           {text}

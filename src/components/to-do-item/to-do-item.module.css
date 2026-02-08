@@ -5,6 +5,55 @@
   gap: 20px;
 }
 
+.checkbox {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+
+.checkbox input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.checkboxBox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid #c4c4c4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.checkboxBox::after {
+  content: '';
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.checkbox input:checked + .checkboxBox {
+  background: #4c4cff;
+  border-color: #4c4cff;
+}
+
+.checkbox input:checked + .checkboxBox::after {
+  transform: rotate(-45deg) scale(1);
+}
+
+.checkbox input:focus-visible + .checkboxBox {
+  box-shadow: 0 0 0 3px rgba(76, 76, 255, 0.25);
+}
+
 .text {
   font-weight: 600;
 }
