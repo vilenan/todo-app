@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import styles from './App.module.css';
 import Button from './components/button/button';
 import TodoList from './components/to-do-list/to-do-list';
 import type { ITodo } from './types/ITodo';
-import type { ITodoItem } from './components/to-do-item/to-do-item';
+import type { ITodoItem } from './types/ITodoItem';
 
 function App() {
   const [todos, setTodos] = useState(() => {
@@ -11,22 +11,112 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [text, setText] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [touched, setTouched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   //Добавила состояние фильтра
   type FilterType = 'all' | 'active' | 'completed';
   const [filter, setFilter] = useState<FilterType>('all');
 
-  const filteredTodos = todos.filter((todo: ITodo) => {
-    if (filter === 'active') return !todo.completed;
-    if (filter === 'completed') return todo.completed;
-    return true;
-  });
+  const filteredTodos = useMemo(() => {
+    switch (filter) {
+      case 'active':
+        return todos.filter((t: ITodo) => !t.completed);
+      case 'completed':
+        return todos.filter((t: ITodo) => t.completed);
+      default:
+        return todos;
+    }
+  }, [todos, filter]);
+
+  const activeCount = todos.filter((todo: ITodo) => !todo.completed).length;
+  const doneCount = todos.filter((todo: ITodo) => todo.completed).length;
 
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
 
-  function addTodos(text: string) {
-    setTodos([...todos, { id: Date.now(), text: text, completed: false }]);
+  function openModal() {
+    setIsModalOpen(true);
+    setEditingId(null);
+    setText('');
+    setDescription('');
+    setDueDate('');
+    setTouched(false);
+    setError(null);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setEditingId(null);
+    setText('');
+    setDescription('');
+    setDueDate('');
+    setTouched(false);
+    setError(null);
+  }
+
+  useEffect(() => {
+    if (isModalOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isModalOpen]);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    }
+
+    if (isModalOpen) {
+      window.addEventListener('keydown', onKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isModalOpen]);
+
+  function addTodos(text: string, descriptionValue: string, dateValue: string) {
+    const trimmed = text.trim();
+    const trimmedDescription = descriptionValue.trim();
+    setTodos([
+      ...todos,
+      {
+        id: Date.now(),
+        text: trimmed,
+        description: trimmedDescription ? trimmedDescription : undefined,
+        dueDate: dateValue || undefined,
+        completed: false,
+      },
+    ]);
+  }
+
+  function updateTodo(
+    id: number,
+    textValue: string,
+    descriptionValue: string,
+    dateValue: string
+  ) {
+    const trimmed = textValue.trim();
+    const trimmedDescription = descriptionValue.trim();
+    setTodos(
+      todos.map((todo: ITodo) =>
+        todo.id === id
+          ? {
+              ...todo,
+              text: trimmed,
+              description: trimmedDescription ? trimmedDescription : undefined,
+              dueDate: dateValue || undefined,
+            }
+          : todo
+      )
+    );
   }
 
   function removeTask(id: number) {
@@ -41,11 +131,40 @@ function App() {
     );
   }
 
+  function validateText(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) return 'Введите задачу';
+    if (trimmed.length < 3) return 'Минимум 3 символа';
+    if (trimmed.length > 120) return 'Не больше 120 символов';
+    return null;
+  }
+
+  const isSubmitDisabled = Boolean(validateText(text));
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!text.trim()) return;
-    addTodos(text);
-    setText('');
+    const nextError = validateText(text);
+    setTouched(true);
+    setError(nextError);
+    if (nextError) return;
+    if (editingId !== null) {
+      updateTodo(editingId, text, description, dueDate);
+    } else {
+      addTodos(text, description, dueDate);
+    }
+    closeModal();
+  }
+
+  function handleEdit(id: number) {
+    const todo = todos.find((item: ITodo) => item.id === id);
+    if (!todo) return;
+    setEditingId(id);
+    setIsModalOpen(true);
+    setText(todo.text);
+    setDescription(todo.description ?? '');
+    setDueDate(todo.dueDate ?? '');
+    setTouched(false);
+    setError(null);
   }
 
   return (
@@ -58,26 +177,21 @@ function App() {
           усилий.
         </p>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Введите задачу"
-            className={styles.input}
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-            }}
-          />
-          <Button type="submit">Добавить</Button>
-        </form>
+        <Button type="button" onClick={openModal}>
+          Добавить задачу
+        </Button>
 
         <TodoList
           todos={filteredTodos}
           onRemove={removeTask}
           onToggle={toggleTodo}
+          onEdit={handleEdit}
         />
 
         <p>Всего задач: {todos.length}</p>
+        <p>Активных задач: {activeCount}</p>
+        <p>Выполненных задач: {doneCount}</p>
+
         <div className={styles.controls}>
           <button className={styles.button} onClick={() => setFilter('all')}>
             Все
@@ -92,6 +206,88 @@ function App() {
             Выполненные
           </button>
         </div>
+
+        {isModalOpen && (
+          <div className={styles.modalOverlay} onClick={closeModal}>
+            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>
+                  {editingId !== null ? 'Редактировать задачу' : 'Новая задача'}
+                </h2>
+                <button
+                  type="button"
+                  className={styles.iconButton}
+                  onClick={closeModal}
+                  aria-label="Закрыть"
+                >
+                  ×
+                </button>
+              </div>
+
+              <form className={styles.modalForm} onSubmit={handleSubmit}>
+                <label className={styles.label}>
+                  Текст задачи
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Например: оплатить счета"
+                    className={`${styles.input} ${
+                      error ? styles.inputError : ''
+                    }`}
+                    value={text}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setText(value);
+                      if (touched) {
+                        setError(validateText(value));
+                      }
+                    }}
+                    onBlur={() => {
+                      setTouched(true);
+                      setError(validateText(text));
+                    }}
+                  />
+                </label>
+
+                <label className={styles.label}>
+                  Описание
+                  <textarea
+                    placeholder="Коротко опиши, что нужно сделать"
+                    className={styles.textarea}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                  />
+                </label>
+
+                <label className={styles.label}>
+                  Срок выполнения
+                  <input
+                    type="date"
+                    className={styles.input}
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                  />
+                </label>
+
+                {error && <p className={styles.error}>{error}</p>}
+
+                <div className={styles.modalActions}>
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    onClick={closeModal}
+                  >
+                    Отмена
+                  </button>
+                  <Button type="submit" disabled={isSubmitDisabled}>
+                    {editingId !== null ? 'Сохранить' : 'Добавить'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
