@@ -191,15 +191,24 @@ function App() {
         </p>
 
         <Button type="button" onClick={openModal}>
-          Добавить задачу
+          + Добавить задачу
         </Button>
 
-        <TodoList
-          todos={filteredTodos}
-          onRemove={removeTask}
-          onToggle={toggleTodo}
-          onEdit={handleEdit}
-        />
+        {filteredTodos.length === 0 ? (
+          <div className={styles.emptyState}>
+            <h2 className={styles.emptyTitle}>Пока задач нет</h2>
+            <p className={styles.emptyText}>
+              Создай первую задачу и начни планировать.
+            </p>
+          </div>
+        ) : (
+          <TodoList
+            todos={filteredTodos}
+            onRemove={removeTask}
+            onToggle={toggleTodo}
+            onEdit={handleEdit}
+          />
+        )}
 
         <div className={styles.controls}>
           <button className={styles.button} onClick={() => setFilter('all')}>
