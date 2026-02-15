@@ -1,8 +1,27 @@
 .item {
-  width: 100%;
   display: flex;
   align-items: flex-start;
-  gap: 20px;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  transition:
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.item:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.item:focus-within {
+  border-color: rgba(76, 76, 255, 0.5);
+  box-shadow:
+    0 0 0 3px rgba(76, 76, 255, 0.2),
+    0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
 .checkbox {
@@ -72,13 +91,13 @@
 
 .description {
   margin: 0;
-  color: #555;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 14px;
 }
 
 .due {
   margin: 0;
-  color: #1d4ed8;
+  color: #7aa2ff;
   font-size: 13px;
   font-weight: 600;
 }

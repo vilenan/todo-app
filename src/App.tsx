@@ -5,6 +5,10 @@ import TodoForm from './components/todo-form/todo-form';
 import TodoList from './components/to-do-list/to-do-list';
 import type { ITodo } from './types/ITodo';
 import type { ITodoItem } from './types/ITodoItem';
+import { Modal } from './components/modal/modal';
+
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import TodoDetailsPage from './pages/TodoDetailsPage';
 
 function App() {
   const [todos, setTodos] = useState(() => {
@@ -15,12 +19,13 @@ function App() {
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const navigate = useNavigate();
   //Добавила состояние фильтра
   type FilterType = 'all' | 'active' | 'completed';
+
   const [filter, setFilter] = useState<FilterType>('all');
 
   const filteredTodos = useMemo(() => {
@@ -34,16 +39,17 @@ function App() {
     }
   }, [todos, filter]);
 
+  // счетчики
   const activeCount = todos.filter((todo: ITodo) => !todo.completed).length;
   const doneCount = todos.filter((todo: ITodo) => todo.completed).length;
 
+  // сохраняем задачи в браузере при изменении списка задач
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
 
   function openModal() {
     setIsModalOpen(true);
-    setEditingId(null);
     setText('');
     setDescription('');
     setDueDate('');
@@ -53,7 +59,6 @@ function App() {
 
   function closeModal() {
     setIsModalOpen(false);
-    setEditingId(null);
     setText('');
     setDescription('');
     setDueDate('');
@@ -65,22 +70,6 @@ function App() {
     if (isModalOpen) {
       inputRef.current?.focus();
     }
-  }, [isModalOpen]);
-
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        closeModal();
-      }
-    }
-
-    if (isModalOpen) {
-      window.addEventListener('keydown', onKeyDown);
-    }
-
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
   }, [isModalOpen]);
 
   function addTodos(text: string, descriptionValue: string, dateValue: string) {
@@ -160,27 +149,15 @@ function App() {
     setTouched(true);
     setError(nextError);
     if (nextError) return;
-    if (editingId !== null) {
-      updateTodo(editingId, text, description, dueDate);
-    } else {
-      addTodos(text, description, dueDate);
-    }
+    addTodos(text, description, dueDate);
     closeModal();
   }
 
   function handleEdit(id: number) {
-    const todo = todos.find((item: ITodo) => item.id === id);
-    if (!todo) return;
-    setEditingId(id);
-    setIsModalOpen(true);
-    setText(todo.text);
-    setDescription(todo.description ?? '');
-    setDueDate(todo.dueDate ?? '');
-    setTouched(false);
-    setError(null);
+    navigate(`/todo/${id}`);
   }
 
-  return (
+  const listPage = (
     <>
       <div className={styles.container}>
         <h1 className={styles.title}>Создай удобный список дел</h1>
@@ -226,42 +203,36 @@ function App() {
         </div>
 
         {isModalOpen && (
-          <div className={styles.modalOverlay} onClick={closeModal}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <h2>
-                  {editingId !== null ? 'Редактировать задачу' : 'Новая задача'}
-                </h2>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={closeModal}
-                  aria-label="Закрыть"
-                >
-                  ×
-                </button>
-              </div>
-
-              <TodoForm
-                text={text}
-                description={description}
-                dueDate={dueDate}
-                error={error}
-                isSubmitDisabled={isSubmitDisabled}
-                submitLabel={editingId !== null ? 'Сохранить' : 'Добавить'}
-                onSubmit={handleSubmit}
-                onCancel={closeModal}
-                onTextChange={handleTextChange}
-                onTextBlur={handleTextBlur}
-                onDescriptionChange={setDescription}
-                onDueDateChange={setDueDate}
-                inputRef={inputRef}
-              />
-            </div>
-          </div>
+          <Modal title="Новая задача" onClose={closeModal}>
+            <TodoForm
+              text={text}
+              description={description}
+              dueDate={dueDate}
+              error={error}
+              isSubmitDisabled={isSubmitDisabled}
+              submitLabel="Добавить"
+              onSubmit={handleSubmit}
+              onCancel={closeModal}
+              onTextChange={handleTextChange}
+              onTextBlur={handleTextBlur}
+              onDescriptionChange={setDescription}
+              onDueDateChange={setDueDate}
+              inputRef={inputRef}
+            />
+          </Modal>
         )}
       </div>
     </>
+  );
+
+  return (
+    <Routes>
+      <Route path="/" element={listPage} />
+      <Route
+        path="/todo/:id"
+        element={<TodoDetailsPage todos={todos} onUpdate={updateTodo} />}
+      />
+    </Routes>
   );
 }
 
