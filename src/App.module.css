@@ -1,5 +1,10 @@
 .title {
   font-weight: 800;
+  margin-bottom: 0;
+}
+
+.slogan {
+  margin: 0;
 }
 
 .container {
@@ -26,6 +31,34 @@
   font-size: 16px;
 }
 
+.clearButton {
+  border: 2px solid #e5484d;
+  border-radius: 8px;
+  height: 56px;
+  padding: 0 18px;
+  background: transparent;
+  color: #e5484d;
+  text-transform: uppercase;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.clearButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(229, 72, 77, 0.08);
+  box-shadow: 0 6px 16px rgba(229, 72, 77, 0.2);
+}
+
+.clearButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .emptyState {
   width: 100%;
   padding: 32px;
@@ -45,4 +78,11 @@
 .emptyText {
   margin: 0;
   color: #666;
+}
+
+.resetsWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 }

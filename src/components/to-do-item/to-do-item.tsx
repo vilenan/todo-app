@@ -5,7 +5,6 @@ import type { ITodoItem } from '../../types/ITodoItem';
 
 export function TodoItem({
   text,
-  description,
   dueDate,
   id,
   completed,
@@ -30,7 +29,6 @@ export function TodoItem({
         <span className={`${styles.text} ${completed ? styles.done : ''}`}>
           {text}
         </span>
-        {description && <p className={styles.description}>{description}</p>}
         {dueDate && <p className={styles.due}>Срок: {dueDate}</p>}
       </div>
       <Button

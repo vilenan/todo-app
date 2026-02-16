@@ -157,6 +157,20 @@ function App() {
     navigate(`/todo/${id}`);
   }
 
+  function handleReset() {
+    if (todos.length === 0) return;
+    const confirmed = window.confirm(
+      'Очистить список задач? Это действие нельзя отменить.'
+    );
+    if (!confirmed) return;
+    setTodos([]);
+  }
+  function handleDoneReset() {
+    if (doneCount === 0) return;
+
+    setTodos(todos.filter((todo: ITodo) => !todo.completed));
+  }
+
   const listPage = (
     <>
       <div className={styles.container}>
@@ -199,6 +213,24 @@ function App() {
             onClick={() => setFilter('completed')}
           >
             Выполненные {doneCount}
+          </button>
+        </div>
+        <div className={styles.resetsWrapper}>
+          <button
+            type="button"
+            className={styles.clearButton}
+            onClick={handleDoneReset}
+            disabled={doneCount === 0}
+          >
+            Удалить выполненные
+          </button>
+          <button
+            type="button"
+            className={styles.clearButton}
+            onClick={handleReset}
+            disabled={todos.length === 0}
+          >
+            Очистить список задач
           </button>
         </div>
 
