@@ -7,4 +7,5 @@ export interface ITodoItem {
   onRemove: (id: number) => void;
   onToggle: (id: number) => void;
   onEdit: (id: number) => void;
+  onDetails: (id: number) => void;
 }

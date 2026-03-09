@@ -7,9 +7,16 @@ interface TodoListProps {
   onRemove: (id: number) => void;
   onToggle: (id: number) => void;
   onEdit: (id: number) => void;
+  onDetails: (id: number) => void;
 }
 
-function TodoList({ todos, onRemove, onToggle, onEdit }: TodoListProps) {
+function TodoList({
+  todos,
+  onRemove,
+  onToggle,
+  onEdit,
+  onDetails,
+}: TodoListProps) {
   return (
     <ul className={styles.list}>
       {todos.map((item: ITodo) => (
@@ -23,6 +30,7 @@ function TodoList({ todos, onRemove, onToggle, onEdit }: TodoListProps) {
             onRemove={onRemove}
             onToggle={onToggle}
             onEdit={onEdit}
+            onDetails={onDetails}
           />
         </li>
       ))}

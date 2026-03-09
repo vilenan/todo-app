@@ -11,6 +11,7 @@ export function TodoItem({
   onRemove,
   onToggle,
   onEdit,
+  onDetails,
 }: ITodoItem) {
   return (
     <div className={styles.item}>
@@ -31,6 +32,13 @@ export function TodoItem({
         </span>
         {dueDate && <p className={styles.due}>Срок: {dueDate}</p>}
       </div>
+      <Button
+        onClick={() => {
+          onDetails(id);
+        }}
+      >
+        Подробнее
+      </Button>
       <Button
         onClick={() => {
           onEdit(id);

@@ -19,6 +19,7 @@ function App() {
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -50,6 +51,7 @@ function App() {
 
   function openModal() {
     setIsModalOpen(true);
+    setEditingId(null);
     setText('');
     setDescription('');
     setDueDate('');
@@ -57,8 +59,21 @@ function App() {
     setError(null);
   }
 
+  function openEditModal(id: number) {
+    const todo = todos.find((item: ITodo) => item.id === id);
+    if (!todo) return;
+    setIsModalOpen(true);
+    setEditingId(id);
+    setText(todo.text);
+    setDescription(todo.description ?? '');
+    setDueDate(todo.dueDate ?? '');
+    setTouched(false);
+    setError(null);
+  }
+
   function closeModal() {
     setIsModalOpen(false);
+    setEditingId(null);
     setText('');
     setDescription('');
     setDueDate('');
@@ -149,11 +164,19 @@ function App() {
     setTouched(true);
     setError(nextError);
     if (nextError) return;
-    addTodos(text, description, dueDate);
+    if (editingId === null) {
+      addTodos(text, description, dueDate);
+    } else {
+      updateTodo(editingId, text, description, dueDate);
+    }
     closeModal();
   }
 
   function handleEdit(id: number) {
+    openEditModal(id);
+  }
+
+  function handleDetails(id: number) {
     navigate(`/todo/${id}`);
   }
 
@@ -170,6 +193,8 @@ function App() {
 
     setTodos(todos.filter((todo: ITodo) => !todo.completed));
   }
+
+  const isEditing = editingId !== null;
 
   const listPage = (
     <>
@@ -198,6 +223,7 @@ function App() {
             onRemove={removeTask}
             onToggle={toggleTodo}
             onEdit={handleEdit}
+            onDetails={handleDetails}
           />
         )}
 
@@ -235,14 +261,17 @@ function App() {
         </div>
 
         {isModalOpen && (
-          <Modal title="Новая задача" onClose={closeModal}>
+          <Modal
+            title={isEditing ? 'Редактирование' : 'Новая задача'}
+            onClose={closeModal}
+          >
             <TodoForm
               text={text}
               description={description}
               dueDate={dueDate}
               error={error}
               isSubmitDisabled={isSubmitDisabled}
-              submitLabel="Добавить"
+              submitLabel={isEditing ? 'Сохранить' : 'Добавить'}
               onSubmit={handleSubmit}
               onCancel={closeModal}
               onTextChange={handleTextChange}
@@ -260,10 +289,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={listPage} />
-      <Route
-        path="/todo/:id"
-        element={<TodoDetailsPage todos={todos} onUpdate={updateTodo} />}
-      />
+      <Route path="/todo/:id" element={<TodoDetailsPage todos={todos} />} />
     </Routes>
   );
 }
