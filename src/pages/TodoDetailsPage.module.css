@@ -76,6 +76,25 @@
   word-break: break-word;
 }
 
+.deadlineNeutral {
+  color: #61708b;
+}
+
+.deadlineOk {
+  color: #17603f;
+  font-weight: 600;
+}
+
+.deadlineWarning {
+  color: #a35f00;
+  font-weight: 600;
+}
+
+.deadlineDanger {
+  color: #b4232d;
+  font-weight: 700;
+}
+
 .backLink {
   color: #3f63dd;
   text-decoration: none;
