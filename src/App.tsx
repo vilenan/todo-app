@@ -4,17 +4,22 @@ import Button from './components/button/button';
 import TodoForm from './components/todo-form/todo-form';
 import TodoList from './components/to-do-list/to-do-list';
 import type { ITodo } from './types/ITodo';
-import type { ITodoItem } from './types/ITodoItem';
 import { Modal } from './components/modal/modal';
 
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import TodoDetailsPage from './pages/TodoDetailsPage';
+import { useTodos } from './context/todos/useTodos';
 
 function App() {
-  const [todos, setTodos] = useState(() => {
-    const saved = localStorage.getItem('todos');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const {
+    todos,
+    addTodo,
+    updateTodo,
+    removeTodo,
+    toggleTodo,
+    clearAll,
+    clearCompleted,
+  } = useTodos();
   const [text, setText] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -43,11 +48,6 @@ function App() {
   // счетчики
   const activeCount = todos.filter((todo: ITodo) => !todo.completed).length;
   const doneCount = todos.filter((todo: ITodo) => todo.completed).length;
-
-  // сохраняем задачи в браузере при изменении списка задач
-  useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
 
   function openModal() {
     setIsModalOpen(true);
@@ -90,19 +90,14 @@ function App() {
   function addTodos(text: string, descriptionValue: string, dateValue: string) {
     const trimmed = text.trim();
     const trimmedDescription = descriptionValue.trim();
-    setTodos([
-      ...todos,
-      {
-        id: Date.now(),
-        text: trimmed,
-        description: trimmedDescription ? trimmedDescription : undefined,
-        dueDate: dateValue || undefined,
-        completed: false,
-      },
-    ]);
+    addTodo({
+      text: trimmed,
+      description: trimmedDescription ? trimmedDescription : undefined,
+      dueDate: dateValue || undefined,
+    });
   }
 
-  function updateTodo(
+  function handleUpdateTodo(
     id: number,
     textValue: string,
     descriptionValue: string,
@@ -110,30 +105,20 @@ function App() {
   ) {
     const trimmed = textValue.trim();
     const trimmedDescription = descriptionValue.trim();
-    setTodos(
-      todos.map((todo: ITodo) =>
-        todo.id === id
-          ? {
-              ...todo,
-              text: trimmed,
-              description: trimmedDescription ? trimmedDescription : undefined,
-              dueDate: dateValue || undefined,
-            }
-          : todo
-      )
-    );
+    updateTodo({
+      id,
+      text: trimmed,
+      description: trimmedDescription ? trimmedDescription : undefined,
+      dueDate: dateValue || undefined,
+    });
   }
 
   function removeTask(id: number) {
-    setTodos(todos.filter((item: ITodoItem) => item.id !== id));
+    removeTodo(id);
   }
 
-  function toggleTodo(id: number) {
-    setTodos(
-      todos.map((todo: ITodo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  function handleToggleTodo(id: number) {
+    toggleTodo(id);
   }
 
   function validateText(value: string) {
@@ -167,7 +152,7 @@ function App() {
     if (editingId === null) {
       addTodos(text, description, dueDate);
     } else {
-      updateTodo(editingId, text, description, dueDate);
+      handleUpdateTodo(editingId, text, description, dueDate);
     }
     closeModal();
   }
@@ -186,12 +171,12 @@ function App() {
       'Очистить список задач? Это действие нельзя отменить.'
     );
     if (!confirmed) return;
-    setTodos([]);
+    clearAll();
   }
   function handleDoneReset() {
     if (doneCount === 0) return;
 
-    setTodos(todos.filter((todo: ITodo) => !todo.completed));
+    clearCompleted();
   }
 
   const isEditing = editingId !== null;
@@ -221,7 +206,7 @@ function App() {
           <TodoList
             todos={filteredTodos}
             onRemove={removeTask}
-            onToggle={toggleTodo}
+            onToggle={handleToggleTodo}
             onEdit={handleEdit}
             onDetails={handleDetails}
           />

@@ -1,4 +1,5 @@
-import { useCallback, useReducer, type ReactNode } from 'react';
+import { useCallback, useEffect, useReducer, type ReactNode } from 'react';
+import type { ITodo } from '../../types/ITodo';
 import {
   initialTodosState,
   todosReducer,
@@ -7,8 +8,33 @@ import {
 } from './todosReducer';
 import { TodosContext } from './TodosContextInstance';
 
+const TODOS_STORAGE_KEY = 'todos';
+
+function readTodosFromStorage(): ITodo[] {
+  try {
+    const raw = localStorage.getItem(TODOS_STORAGE_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function useTodosState() {
-  const [state, dispatch] = useReducer(todosReducer, initialTodosState);
+  const [state, dispatch] = useReducer(
+    todosReducer,
+    initialTodosState,
+    (baseState) => ({
+      ...baseState,
+      todos: readTodosFromStorage(),
+    })
+  );
+
+  useEffect(() => {
+    localStorage.setItem(TODOS_STORAGE_KEY, JSON.stringify(state.todos));
+  }, [state.todos]);
 
   const addTodo = useCallback((payload: AddTodoPayload) => {
     dispatch({ type: 'ADD_TODO', payload });
