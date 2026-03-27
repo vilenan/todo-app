@@ -1,34 +1,46 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import styles from './App.module.css';
 import Button from './components/button/button';
 import TodoForm from './components/todo-form/todo-form';
 import TodoList from './components/to-do-list/to-do-list';
 import type { ITodo } from './types/ITodo';
 import { Modal } from './components/modal/modal';
+import TodoEditModal from './components/todo-edit-modal/todo-edit-modal';
 
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useSearchParams } from 'react-router-dom';
 import TodoDetailsPage from './pages/TodoDetailsPage';
 import { useTodos } from './context/todos/useTodos';
+import { useEditModal } from './hooks/useEditModal';
 
 function App() {
+  const { todos, addTodo, removeTodo, toggleTodo, clearAll, clearCompleted } =
+    useTodos();
   const {
-    todos,
-    addTodo,
-    updateTodo,
-    removeTodo,
-    toggleTodo,
-    clearAll,
-    clearCompleted,
-  } = useTodos();
+    isOpen: isEditOpen,
+    editingId: currentEditingId,
+    text: editText,
+    description: editDescription,
+    dueDate: editDueDate,
+    error: editError,
+    isSubmitDisabled: isEditSubmitDisabled,
+    setDescription: setEditDescription,
+    setDueDate: setEditDueDate,
+    open: openEditModal,
+    close: closeEditModal,
+    onTextChange: onEditTextChange,
+    onTextBlur: onEditTextBlur,
+    submit: submitEdit,
+  } = useEditModal();
   const [text, setText] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const editInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   //Добавила состояние фильтра
   type FilterType = 'all' | 'active' | 'completed';
 
@@ -51,7 +63,6 @@ function App() {
 
   function openModal() {
     setIsModalOpen(true);
-    setEditingId(null);
     setText('');
     setDescription('');
     setDueDate('');
@@ -59,21 +70,8 @@ function App() {
     setError(null);
   }
 
-  function openEditModal(id: number) {
-    const todo = todos.find((item: ITodo) => item.id === id);
-    if (!todo) return;
-    setIsModalOpen(true);
-    setEditingId(id);
-    setText(todo.text);
-    setDescription(todo.description ?? '');
-    setDueDate(todo.dueDate ?? '');
-    setTouched(false);
-    setError(null);
-  }
-
   function closeModal() {
     setIsModalOpen(false);
-    setEditingId(null);
     setText('');
     setDescription('');
     setDueDate('');
@@ -87,26 +85,58 @@ function App() {
     }
   }, [isModalOpen]);
 
+  useEffect(() => {
+    if (isEditOpen) {
+      editInputRef.current?.focus();
+    }
+  }, [isEditOpen]);
+
+  const clearEditParam = useCallback(() => {
+    if (!searchParams.has('edit')) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('edit');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const editParam = searchParams.get('edit');
+    if (!editParam) {
+      if (isEditOpen) {
+        closeEditModal();
+      }
+      return;
+    }
+
+    const editId = Number(editParam);
+    if (Number.isNaN(editId)) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('edit');
+      setSearchParams(next, { replace: true });
+      return;
+    }
+
+    const todo = todos.find((item: ITodo) => item.id === editId);
+    if (!todo) {
+      clearEditParam();
+      return;
+    }
+    if (isEditOpen && currentEditingId === editId) return;
+    openEditModal(editId);
+  }, [
+    currentEditingId,
+    clearEditParam,
+    closeEditModal,
+    isEditOpen,
+    openEditModal,
+    searchParams,
+    setSearchParams,
+    todos,
+  ]);
+
   function addTodos(text: string, descriptionValue: string, dateValue: string) {
     const trimmed = text.trim();
     const trimmedDescription = descriptionValue.trim();
     addTodo({
-      text: trimmed,
-      description: trimmedDescription ? trimmedDescription : undefined,
-      dueDate: dateValue || undefined,
-    });
-  }
-
-  function handleUpdateTodo(
-    id: number,
-    textValue: string,
-    descriptionValue: string,
-    dateValue: string
-  ) {
-    const trimmed = textValue.trim();
-    const trimmedDescription = descriptionValue.trim();
-    updateTodo({
-      id,
       text: trimmed,
       description: trimmedDescription ? trimmedDescription : undefined,
       dueDate: dateValue || undefined,
@@ -149,16 +179,12 @@ function App() {
     setTouched(true);
     setError(nextError);
     if (nextError) return;
-    if (editingId === null) {
-      addTodos(text, description, dueDate);
-    } else {
-      handleUpdateTodo(editingId, text, description, dueDate);
-    }
+    addTodos(text, description, dueDate);
     closeModal();
   }
 
   function handleEdit(id: number) {
-    openEditModal(id);
+    setSearchParams({ edit: String(id) });
   }
 
   function handleDetails(id: number) {
@@ -178,8 +204,6 @@ function App() {
 
     clearCompleted();
   }
-
-  const isEditing = editingId !== null;
 
   const listPage = (
     <>
@@ -246,17 +270,14 @@ function App() {
         </div>
 
         {isModalOpen && (
-          <Modal
-            title={isEditing ? 'Редактирование' : 'Новая задача'}
-            onClose={closeModal}
-          >
+          <Modal title="Новая задача" onClose={closeModal}>
             <TodoForm
               text={text}
               description={description}
               dueDate={dueDate}
               error={error}
               isSubmitDisabled={isSubmitDisabled}
-              submitLabel={isEditing ? 'Сохранить' : 'Добавить'}
+              submitLabel="Добавить"
               onSubmit={handleSubmit}
               onCancel={closeModal}
               onTextChange={handleTextChange}
@@ -267,6 +288,30 @@ function App() {
             />
           </Modal>
         )}
+        <TodoEditModal
+          isOpen={isEditOpen}
+          text={editText}
+          description={editDescription}
+          dueDate={editDueDate}
+          error={editError}
+          isSubmitDisabled={isEditSubmitDisabled}
+          onSubmit={(e) => {
+            const updated = submitEdit(e);
+            if (updated) {
+              clearEditParam();
+              closeEditModal();
+            }
+          }}
+          onClose={() => {
+            clearEditParam();
+            closeEditModal();
+          }}
+          onTextChange={onEditTextChange}
+          onTextBlur={onEditTextBlur}
+          onDescriptionChange={setEditDescription}
+          onDueDateChange={setEditDueDate}
+          inputRef={editInputRef}
+        />
       </div>
     </>
   );
@@ -274,7 +319,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={listPage} />
-      <Route path="/todo/:id" element={<TodoDetailsPage todos={todos} />} />
+      <Route path="/todo/:id" element={<TodoDetailsPage />} />
     </Routes>
   );
 }

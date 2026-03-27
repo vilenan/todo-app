@@ -105,6 +105,50 @@
   text-decoration: underline;
 }
 
+.actionsRow {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+}
+
+.actionEdit {
+  color: #214b9b;
+  background: #eaf1ff;
+  border-color: #bcd2ff;
+}
+
+.actionEdit:hover {
+  box-shadow: 0 4px 14px rgba(33, 75, 155, 0.2);
+}
+
+.actionDelete {
+  color: #8f1d1d;
+  background: #ffecec;
+  border-color: #ffcdcd;
+}
+
+.actionDelete:hover {
+  box-shadow: 0 4px 14px rgba(143, 29, 29, 0.2);
+}
+
 @media (max-width: 640px) {
   .detailsCard {
     padding: 16px;
@@ -113,5 +157,9 @@
 
   .value {
     font-size: 15px;
+  }
+
+  .actionsRow {
+    flex-direction: column;
   }
 }
