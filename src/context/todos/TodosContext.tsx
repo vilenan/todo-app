@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, type ReactNode } from 'react';
+import { useEffect, useReducer, type ReactNode } from 'react';
 import type { ITodo } from '../../types/ITodo';
 import {
   initialTodosState,
@@ -36,29 +36,29 @@ function useTodosState() {
     localStorage.setItem(TODOS_STORAGE_KEY, JSON.stringify(state.todos));
   }, [state.todos]);
 
-  const addTodo = useCallback((payload: AddTodoPayload) => {
+  const addTodo = (payload: AddTodoPayload) => {
     dispatch({ type: 'ADD_TODO', payload });
-  }, []);
+  };
 
-  const updateTodo = useCallback((payload: UpdateTodoPayload) => {
+  const updateTodo = (payload: UpdateTodoPayload) => {
     dispatch({ type: 'UPDATE_TODO', payload });
-  }, []);
+  };
 
-  const removeTodo = useCallback((id: number) => {
+  const removeTodo = (id: number) => {
     dispatch({ type: 'REMOVE_TODO', payload: { id } });
-  }, []);
+  };
 
-  const toggleTodo = useCallback((id: number) => {
+  const toggleTodo = (id: number) => {
     dispatch({ type: 'TOGGLE_TODO', payload: { id } });
-  }, []);
+  };
 
-  const clearAll = useCallback(() => {
+  const clearAll = () => {
     dispatch({ type: 'CLEAR_ALL' });
-  }, []);
+  };
 
-  const clearCompleted = useCallback(() => {
+  const clearCompleted = () => {
     dispatch({ type: 'CLEAR_COMPLETED' });
-  }, []);
+  };
 
   return {
     todos: state.todos,
