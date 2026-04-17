@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type React from 'react';
 import { useTodos } from '../context/todos/useTodos';
 import type { ITodo } from '../types/ITodo';
@@ -22,7 +22,7 @@ export function useEditModal() {
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isSubmitDisabled = useMemo(() => Boolean(validateText(text)), [text]);
+  const isSubmitDisabled = Boolean(validateText(text));
 
   const open = useCallback(
     (id: number) => {
