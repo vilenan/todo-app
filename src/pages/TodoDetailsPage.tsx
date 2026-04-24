@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import {
   Link,
   useNavigate,
@@ -66,7 +66,7 @@ export default function TodoDetailsPage() {
     ? undefined
     : todos.find((t) => t.id === todoId);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isEditOpen) {
       editInputRef.current?.focus();
     }
