@@ -257,19 +257,22 @@ function App() {
 
         <div className={styles.controls}>
           <button
-            className={styles.button}
+            className={`${styles.button} ${filter === 'all' ? styles.buttonActive : ''}`}
+            aria-pressed={filter === 'all'}
             onClick={() => handleFilterChange('all')}
           >
             Все {todos.length}
           </button>
           <button
-            className={styles.button}
+            className={`${styles.button} ${filter === 'active' ? styles.buttonActive : ''}`}
+            aria-pressed={filter === 'active'}
             onClick={() => handleFilterChange('active')}
           >
             Активные {activeCount}
           </button>
           <button
-            className={styles.button}
+            className={`${styles.button} ${filter === 'completed' ? styles.buttonActive : ''}`}
+            aria-pressed={filter === 'completed'}
             onClick={() => handleFilterChange('completed')}
           >
             Выполненные {doneCount}
