@@ -44,7 +44,14 @@ function App() {
   //Добавила состояние фильтра
   type FilterType = 'all' | 'active' | 'completed';
 
-  const [filter, setFilter] = useState<FilterType>('all');
+  function getFilterSearchParams(searchParams: URLSearchParams): FilterType {
+    const value = searchParams.get('filter');
+    if (value === 'all' || value === 'active' || value === 'completed')
+      return value;
+    return 'all';
+  }
+
+  const filter: FilterType = getFilterSearchParams(searchParams);
 
   const filteredTodos = useMemo(() => {
     switch (filter) {
@@ -56,6 +63,16 @@ function App() {
         return todos;
     }
   }, [todos, filter]);
+
+  function handleFilterChange(nextFilter: FilterType) {
+    const next = new URLSearchParams(searchParams);
+    if (nextFilter === 'all') {
+      next.delete('filter');
+    } else {
+      next.set('filter', nextFilter);
+    }
+    setSearchParams(next);
+  }
 
   // счетчики
   const activeCount = todos.filter((todo: ITodo) => !todo.completed).length;
@@ -184,7 +201,9 @@ function App() {
   }
 
   function handleEdit(id: number) {
-    setSearchParams({ edit: String(id) });
+    const next = new URLSearchParams(searchParams);
+    next.set('edit', String(id));
+    setSearchParams(next);
   }
 
   function handleDetails(id: number) {
@@ -237,15 +256,21 @@ function App() {
         )}
 
         <div className={styles.controls}>
-          <button className={styles.button} onClick={() => setFilter('all')}>
+          <button
+            className={styles.button}
+            onClick={() => handleFilterChange('all')}
+          >
             Все {todos.length}
           </button>
-          <button className={styles.button} onClick={() => setFilter('active')}>
+          <button
+            className={styles.button}
+            onClick={() => handleFilterChange('active')}
+          >
             Активные {activeCount}
           </button>
           <button
             className={styles.button}
-            onClick={() => setFilter('completed')}
+            onClick={() => handleFilterChange('completed')}
           >
             Выполненные {doneCount}
           </button>
