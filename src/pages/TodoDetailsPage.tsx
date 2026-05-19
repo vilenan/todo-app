@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import appStyles from '../App.module.css';
 import styles from './TodoDetailsPage.module.css';
-import { useTodos } from '../context/todos/useTodos';
+import { useTodos } from '../store/todoStore';
 import { useEditModal } from '../hooks/useEditModal';
 import TodoEditModal from '../components/todo-edit-modal/todo-edit-modal';
 

@@ -6,10 +6,8 @@ import TodoList from './components/to-do-list/to-do-list';
 import type { ITodo } from './types/ITodo';
 import { Modal } from './components/modal/modal';
 import TodoEditModal from './components/todo-edit-modal/todo-edit-modal';
-
-import { Routes, Route, useNavigate, useSearchParams } from 'react-router-dom';
-import TodoDetailsPage from './pages/TodoDetailsPage';
-import { useTodos } from './context/todos/useTodos';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTodos } from './store/todoStore';
 import { useEditModal } from './hooks/useEditModal';
 
 function App() {
@@ -344,12 +342,7 @@ function App() {
     </>
   );
 
-  return (
-    <Routes>
-      <Route path="/" element={listPage} />
-      <Route path="/todo/:id" element={<TodoDetailsPage />} />
-    </Routes>
-  );
+  return listPage;
 }
 
 export default App;

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import type React from 'react';
-import { useTodos } from '../context/todos/useTodos';
+import { useTodos } from '../store/todoStore';
 import type { ITodo } from '../types/ITodo';
 
 function validateText(value: string) {
