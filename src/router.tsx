@@ -1,7 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import App from './App';
 import AppLayout from './AppLayout';
-import TodoDetailsPage from './pages/TodoDetailsPage';
 
 export const router = createBrowserRouter([
   {
@@ -14,7 +13,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'todo/:id',
-        element: <TodoDetailsPage />,
+        lazy: () => import('./pages/TodoDetailsPage'),
       },
     ],
   },

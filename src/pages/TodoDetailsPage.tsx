@@ -39,7 +39,7 @@ function getDeadlineStatus(dueDate?: string) {
   return { label: `Осталось ${diffDays} дн.`, tone: 'deadlineOk' as const };
 }
 
-export default function TodoDetailsPage() {
+export function Component() {
   const { todos, removeTodo } = useTodos();
   const {
     isOpen: isEditOpen,
@@ -64,7 +64,7 @@ export default function TodoDetailsPage() {
   const todoId = Number(id);
   const todo = Number.isNaN(todoId)
     ? undefined
-    : todos.find((t) => t.id === todoId);
+    : todos.find((item) => item.id === todoId);
 
   useLayoutEffect(() => {
     if (isEditOpen) {
