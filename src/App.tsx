@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import styles from './App.module.css';
 import Button from './components/button/button';
 import TodoForm from './components/todo-form/todo-form';
@@ -216,6 +217,7 @@ function App() {
     if (!confirmed) return;
     clearAll();
   }
+
   function handleDoneReset() {
     if (doneCount === 0) return;
 
@@ -225,6 +227,15 @@ function App() {
   const listPage = (
     <>
       <div className={styles.container}>
+        <div className={styles.authLinks}>
+          <Link className={styles.authLink} to="/login">
+            Login
+          </Link>
+          <Link className={styles.authLink} to="/signup">
+            Signup
+          </Link>
+        </div>
+
         <h1 className={styles.title}>Создай удобный список дел</h1>
 
         <p className={styles.slogan}>

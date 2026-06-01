@@ -1,0 +1,78 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.card {
+  width: min(100%, 440px);
+  padding: 28px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(17, 24, 39, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+}
+
+.text {
+  margin: 0;
+  color: #5b6170;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.input {
+  min-height: 48px;
+  border: 1px solid #d5d9e4;
+  border-radius: 12px;
+  padding: 0 14px;
+  font: inherit;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.button {
+  border: 0;
+  border-radius: 12px;
+  min-height: 52px;
+  background: #2040d8;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.note {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #eef3ff;
+  color: #26408b;
+}
+
+.link {
+  color: #2040d8;
+  font-weight: 600;
+}

@@ -11,6 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
+tools/pocketbase/pocketbase
+tools/pocketbase/pb_data
+tools/pocketbase/pb_public
+tools/pocketbase/CHANGELOG.md
+tools/pocketbase/LICENSE.md
+tools/.DS_Store
 
 # Editor directories and files
 .vscode/*

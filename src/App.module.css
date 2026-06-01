@@ -16,6 +16,18 @@
   gap: 20px;
 }
 
+.authLinks {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.authLink {
+  color: #4c4cff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .controls {
   display: flex;
   align-items: center;
