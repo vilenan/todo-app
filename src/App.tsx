@@ -10,6 +10,7 @@ import TodoEditModal from './components/todo-edit-modal/todo-edit-modal';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTodos } from './store/todoStore';
 import { useEditModal } from './hooks/useEditModal';
+import { useAuthStore } from './store/authStore';
 
 function App() {
   const { todos, addTodo, removeTodo, toggleTodo, clearAll, clearCompleted } =
@@ -40,6 +41,12 @@ function App() {
   const editInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { initAuth, user } = useAuthStore();
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
   //Добавила состояние фильтра
   type FilterType = 'all' | 'active' | 'completed';
 
@@ -235,6 +242,7 @@ function App() {
             Signup
           </Link>
         </div>
+        {user ? <p>Вы вошли как {user.email}</p> : <p>Пока никто не вошел</p>}
 
         <h1 className={styles.title}>Создай удобный список дел</h1>
 

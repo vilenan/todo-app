@@ -1,36 +1,16 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './AuthPage.module.css';
-import { pb } from '../lib/pocketbase';
+import { useAuthStore } from '../store/authStore';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [authStatus, setAuthStatus] = useState('');
-  const [currentUserEmail, setCurrentUserEmail] = useState(
-    pb.authStore.record?.email ?? ''
-  );
+  const { user, login, logout, error, clearError } = useAuthStore();
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    try {
-      await pb.collection('users').authWithPassword(email, password);
-      console.log('pb.authStore.isValid:', pb.authStore.isValid);
-      console.log('pb.authStore.token:', pb.authStore.token);
-      console.log('pb.authStore.record:', pb.authStore.record);
-      setAuthStatus('Вход выполнен успешно.');
-      setCurrentUserEmail(pb.authStore.record?.email ?? '');
-    } catch (error) {
-      console.error('PocketBase auth error:', error);
-      setAuthStatus('Не удалось войти. Проверьте email и пароль.');
-    }
-  }
-
-  function handleLogout() {
-    pb.authStore.clear();
-    setCurrentUserEmail('');
-    setAuthStatus('Вы вышли из аккаунта.');
+    await login(email, password);
   }
 
   return (
@@ -38,15 +18,10 @@ export default function LoginPage() {
       <section className={styles.card}>
         <h1 className={styles.title}>Вход</h1>
 
-        {currentUserEmail ? (
+        {user ? (
           <div className={styles.actions}>
-            <p className={styles.note}>Вы вошли как {currentUserEmail}</p>
-            {authStatus && <p className={styles.note}>{authStatus}</p>}
-            <button
-              className={styles.button}
-              type="button"
-              onClick={handleLogout}
-            >
+            <p className={styles.note}>Вы вошли как {user.email}</p>
+            <button className={styles.button} type="button" onClick={logout}>
               Выйти
             </button>
           </div>
@@ -59,7 +34,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => {
-                  setAuthStatus('');
+                  clearError();
                   setEmail(e.target.value);
                 }}
                 placeholder="Введите email"
@@ -74,7 +49,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => {
-                  setAuthStatus('');
+                  clearError();
                   setPassword(e.target.value);
                 }}
                 placeholder="Введите пароль"
@@ -87,7 +62,7 @@ export default function LoginPage() {
                 Войти
               </button>
 
-              {authStatus && <p className={styles.note}>{authStatus}</p>}
+              {error && <p className={styles.note}>{error}</p>}
 
               <p className={styles.text}>
                 Нет аккаунта?{' '}
