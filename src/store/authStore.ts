@@ -29,6 +29,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   error: null,
 
   initAuth: async () => {
+    set({ isLoading: true });
     if (pb.authStore.isValid) {
       set({
         user: {
@@ -36,12 +37,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
           email: pb.authStore.record?.email ?? '',
         },
         isAuthenticated: true,
+        isLoading: false,
       });
     } else {
       pb.authStore.clear();
       set({
         user: null,
         isAuthenticated: false,
+        isLoading: false,
         error: null,
       });
     }
@@ -101,7 +104,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   logout: () => {
     pb.authStore.clear();
-    set({ user: null, isAuthenticated: false, error: null });
+    set({ user: null, isAuthenticated: false, error: null, isLoading: false });
   },
 
   clearError: () => {

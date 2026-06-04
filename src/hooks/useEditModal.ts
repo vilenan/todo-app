@@ -15,7 +15,7 @@ export function useEditModal() {
   const { todos, updateTodo } = useTodos();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [text, setText] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -25,7 +25,7 @@ export function useEditModal() {
   const isSubmitDisabled = Boolean(validateText(text));
 
   const open = useCallback(
-    (id: number) => {
+    (id: string) => {
       const todo = todos.find((item: ITodo) => item.id === id);
       if (!todo) return false;
 

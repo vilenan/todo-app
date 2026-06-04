@@ -61,10 +61,8 @@ export function Component() {
   const [searchParams, setSearchParams] = useSearchParams();
   const editInputRef = useRef<HTMLInputElement | null>(null);
   const { id } = useParams();
-  const todoId = Number(id);
-  const todo = Number.isNaN(todoId)
-    ? undefined
-    : todos.find((item) => item.id === todoId);
+  const todoId = id;
+  const todo = id ? todos.find((item) => item.id === todoId) : undefined;
 
   useLayoutEffect(() => {
     if (isEditOpen) {
@@ -88,11 +86,7 @@ export function Component() {
       return;
     }
 
-    const editId = Number(editParam);
-    if (Number.isNaN(editId)) {
-      clearEditParam();
-      return;
-    }
+    const editId = editParam;
 
     if (!todo || editId !== todo.id) {
       clearEditParam();

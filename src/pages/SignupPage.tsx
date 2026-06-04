@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './AuthPage.module.css';
 import { useAuthStore } from '../store/authStore';
 
@@ -8,11 +8,18 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const { user, signUp, error, clearError, logout } = useAuthStore();
+  const navigate = useNavigate();
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     await signUp(email, password, confirmPassword);
   }
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   return (
     <main className={styles.shell}>

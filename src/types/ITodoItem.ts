@@ -2,10 +2,10 @@ export interface ITodoItem {
   text: string;
   description?: string;
   dueDate?: string;
-  id: number;
+  id: string;
   completed: boolean;
-  onRemove: (id: number) => void;
-  onToggle: (id: number) => void;
-  onEdit: (id: number) => void;
-  onDetails: (id: number) => void;
+  onRemove: (id: string) => void;
+  onToggle: (id: string) => void;
+  onEdit: (id: string) => void;
+  onDetails: (id: string) => void;
 }

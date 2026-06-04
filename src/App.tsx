@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './App.module.css';
 import Button from './components/button/button';
 import TodoForm from './components/todo-form/todo-form';
@@ -7,14 +7,20 @@ import TodoList from './components/to-do-list/to-do-list';
 import type { ITodo } from './types/ITodo';
 import { Modal } from './components/modal/modal';
 import TodoEditModal from './components/todo-edit-modal/todo-edit-modal';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTodos } from './store/todoStore';
 import { useEditModal } from './hooks/useEditModal';
 import { useAuthStore } from './store/authStore';
 
 function App() {
-  const { todos, addTodo, removeTodo, toggleTodo, clearAll, clearCompleted } =
-    useTodos();
+  const {
+    todos,
+    addTodo,
+    removeTodo,
+    toggleTodo,
+    clearAll,
+    clearCompleted,
+    fetchTodos,
+  } = useTodos();
   const {
     isOpen: isEditOpen,
     editingId: currentEditingId,
@@ -42,10 +48,12 @@ function App() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { initAuth, user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+
   useEffect(() => {
-    initAuth();
-  }, [initAuth]);
+    if (!user) return;
+    void fetchTodos(user.id);
+  }, [fetchTodos, user]);
 
   //Добавила состояние фильтра
   type FilterType = 'all' | 'active' | 'completed';
@@ -130,13 +138,7 @@ function App() {
       return;
     }
 
-    const editId = Number(editParam);
-    if (Number.isNaN(editId)) {
-      const next = new URLSearchParams(searchParams);
-      next.delete('edit');
-      setSearchParams(next, { replace: true });
-      return;
-    }
+    const editId = editParam;
 
     const todo = todos.find((item: ITodo) => item.id === editId);
     if (!todo) {
@@ -156,21 +158,27 @@ function App() {
     todos,
   ]);
 
-  function addTodos(text: string, descriptionValue: string, dateValue: string) {
+  async function addTodos(
+    text: string,
+    descriptionValue: string,
+    dateValue: string
+  ) {
+    if (!user) return;
     const trimmed = text.trim();
     const trimmedDescription = descriptionValue.trim();
-    addTodo({
+    await addTodo({
       text: trimmed,
       description: trimmedDescription ? trimmedDescription : undefined,
       dueDate: dateValue || undefined,
+      userId: user.id,
     });
   }
 
-  function removeTask(id: number) {
+  function removeTask(id: string) {
     removeTodo(id);
   }
 
-  function handleToggleTodo(id: number) {
+  function handleToggleTodo(id: string) {
     toggleTodo(id);
   }
 
@@ -196,23 +204,23 @@ function App() {
     setError(validateText(text));
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const nextError = validateText(text);
     setTouched(true);
     setError(nextError);
     if (nextError) return;
-    addTodos(text, description, dueDate);
+    await addTodos(text, description, dueDate);
     closeModal();
   }
 
-  function handleEdit(id: number) {
+  function handleEdit(id: string) {
     const next = new URLSearchParams(searchParams);
     next.set('edit', String(id));
     setSearchParams(next);
   }
 
-  function handleDetails(id: number) {
+  function handleDetails(id: string) {
     navigate(`/todo/${id}`);
   }
 
@@ -231,18 +239,17 @@ function App() {
     clearCompleted();
   }
 
+  function handleLogout() {
+    logout();
+  }
+
   const listPage = (
     <>
       <div className={styles.container}>
-        <div className={styles.authLinks}>
-          <Link className={styles.authLink} to="/login">
-            Login
-          </Link>
-          <Link className={styles.authLink} to="/signup">
-            Signup
-          </Link>
-        </div>
         {user ? <p>Вы вошли как {user.email}</p> : <p>Пока никто не вошел</p>}
+        <Button type="button" onClick={() => handleLogout()}>
+          Выйти
+        </Button>
 
         <h1 className={styles.title}>Создай удобный список дел</h1>
 
