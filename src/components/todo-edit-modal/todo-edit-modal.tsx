@@ -1,12 +1,14 @@
 import type { FormEvent, RefObject } from 'react';
 import { Modal } from '../modal/modal';
 import TodoForm from '../todo-form/todo-form';
+import type { TodoPriority } from '../../types/ITodo';
 
 type TodoEditModalProps = {
   isOpen: boolean;
   text: string;
   description: string;
   dueDate: string;
+  priority?: TodoPriority;
   error: string | null;
   isSubmitDisabled: boolean;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
@@ -14,6 +16,7 @@ type TodoEditModalProps = {
   onTextChange: (value: string) => void;
   onTextBlur: () => void;
   onDescriptionChange: (value: string) => void;
+  onPriorityChange?: (value: TodoPriority) => void;
   onDueDateChange: (value: string) => void;
   inputRef: RefObject<HTMLInputElement | null>;
 };
@@ -23,6 +26,7 @@ export default function TodoEditModal({
   text,
   description,
   dueDate,
+  priority = 'medium',
   error,
   isSubmitDisabled,
   onSubmit,
@@ -30,6 +34,7 @@ export default function TodoEditModal({
   onTextChange,
   onTextBlur,
   onDescriptionChange,
+  onPriorityChange = () => {},
   onDueDateChange,
   inputRef,
 }: TodoEditModalProps) {
@@ -41,6 +46,7 @@ export default function TodoEditModal({
         text={text}
         description={description}
         dueDate={dueDate}
+        priority={priority}
         error={error}
         isSubmitDisabled={isSubmitDisabled}
         submitLabel="Сохранить"
@@ -49,6 +55,7 @@ export default function TodoEditModal({
         onTextChange={onTextChange}
         onTextBlur={onTextBlur}
         onDescriptionChange={onDescriptionChange}
+        onPriorityChange={onPriorityChange}
         onDueDateChange={onDueDateChange}
         inputRef={inputRef}
       />

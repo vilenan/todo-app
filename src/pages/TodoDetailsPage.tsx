@@ -47,10 +47,12 @@ export function Component() {
     text: editText,
     description: editDescription,
     dueDate: editDueDate,
+    priority: editPriority,
     error: editError,
     isSubmitDisabled: isEditSubmitDisabled,
     setDescription: setEditDescription,
     setDueDate: setEditDueDate,
+    setPriority: setEditPriority,
     open: openEditModal,
     close: closeEditModal,
     onTextChange: onEditTextChange,
@@ -197,6 +199,7 @@ export function Component() {
         text={editText}
         description={editDescription}
         dueDate={editDueDate}
+        priority={editPriority}
         error={editError}
         isSubmitDisabled={isEditSubmitDisabled}
         onSubmit={(e) => {
@@ -213,6 +216,7 @@ export function Component() {
         onTextChange={onEditTextChange}
         onTextBlur={onEditTextBlur}
         onDescriptionChange={setEditDescription}
+        onPriorityChange={setEditPriority}
         onDueDateChange={setEditDueDate}
         inputRef={editInputRef}
       />

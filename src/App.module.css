@@ -118,3 +118,38 @@
   justify-content: center;
   gap: 20px;
 }
+
+.topActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.statsLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  background: #eef4ff;
+  color: #1d4ed8;
+  border: 1px solid #c7d2fe;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.statsLink:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.statsLink:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}

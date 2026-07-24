@@ -2,12 +2,14 @@ import styles from './to-do-item.module.css';
 import Button from '../button/button';
 
 import type { ITodoItem } from '../../types/ITodoItem';
+import { getPriorityLabel, getPriorityClass } from '../../lib/toDoPriority';
 
 export function TodoItem({
   text,
   dueDate,
   id,
   completed,
+  priority,
   onRemove,
   onToggle,
   onEdit,
@@ -30,7 +32,14 @@ export function TodoItem({
         <span className={`${styles.text} ${completed ? styles.done : ''}`}>
           {text}
         </span>
-        {dueDate && <p className={styles.due}>Срок: {dueDate}</p>}
+        <div className={styles.metaRow}>
+          {dueDate && <p className={styles.due}>Срок: {dueDate}</p>}
+          <span
+            className={`${styles.priorityBadge} ${styles[getPriorityClass(priority)]}`}
+          >
+            Приоритет {getPriorityLabel(priority)}
+          </span>
+        </div>
       </div>
       <Button
         onClick={() => {

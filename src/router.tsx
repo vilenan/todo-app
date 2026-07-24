@@ -3,6 +3,7 @@ import App from './App';
 import AppLayout from './AppLayout';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import StatisticPage from './pages/StatisticPage';
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <App />,
+      },
+      {
+        path: 'stats',
+        element: <StatisticPage />,
       },
       {
         path: 'todo/:id',

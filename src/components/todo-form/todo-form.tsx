@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+import type { TodoPriority } from '../../types/ITodo';
 import styles from './todo-form.module.css';
 import Button from '../button/button';
 
@@ -6,6 +7,7 @@ interface TodoFormProps {
   text: string;
   description: string;
   dueDate: string;
+  priority: TodoPriority;
   error: string | null;
   isSubmitDisabled: boolean;
   submitLabel: string;
@@ -15,6 +17,7 @@ interface TodoFormProps {
   onTextBlur: () => void;
   onDescriptionChange: (value: string) => void;
   onDueDateChange: (value: string) => void;
+  onPriorityChange: (value: TodoPriority) => void;
   inputRef: RefObject<HTMLInputElement | null>;
 }
 
@@ -22,6 +25,7 @@ function TodoForm({
   text,
   description,
   dueDate,
+  priority,
   error,
   isSubmitDisabled,
   submitLabel,
@@ -31,6 +35,7 @@ function TodoForm({
   onTextBlur,
   onDescriptionChange,
   onDueDateChange,
+  onPriorityChange,
   inputRef,
 }: TodoFormProps) {
   return (
@@ -57,6 +62,19 @@ function TodoForm({
           onChange={(e) => onDescriptionChange(e.target.value)}
           rows={3}
         />
+      </label>
+      <label className={styles.label}>
+        Приоритет
+        <select
+          value={priority}
+          onChange={(e) =>
+            onPriorityChange(e.target.value as 'low' | 'medium' | 'high')
+          }
+        >
+          <option value="low">Низкий</option>
+          <option value="medium">Средний</option>
+          <option value="high">Высокий</option>
+        </select>
       </label>
 
       <label className={styles.label}>

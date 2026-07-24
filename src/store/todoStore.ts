@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ITodo } from '../types/ITodo';
+import type { ITodo, TodoPriority } from '../types/ITodo';
 import { pb } from '../lib/pocketbase';
 
 export type AddTodoPayload = {
@@ -7,6 +7,7 @@ export type AddTodoPayload = {
   text: string;
   description?: string;
   dueDate?: string;
+  priority?: TodoPriority;
 };
 
 export type UpdateTodoPayload = {
@@ -14,6 +15,7 @@ export type UpdateTodoPayload = {
   text: string;
   description?: string;
   dueDate?: string;
+  priority?: TodoPriority;
 };
 
 type TodosStore = {
@@ -42,17 +44,19 @@ export const useTodos = create<TodosStore>()((set, get) => ({
         description: record.description,
         completed: record.completed,
         dueDate: record.dueDate,
+        priority: record.priority,
       })),
     });
   },
 
-  addTodo: async ({ text, description, dueDate, userId }) => {
+  addTodo: async ({ text, description, dueDate, userId, priority }) => {
     const record = await pb.collection('todos').create({
       user: userId,
       text,
       description,
       dueDate,
       completed: false,
+      priority,
     });
     set((state) => ({
       todos: [
@@ -63,16 +67,18 @@ export const useTodos = create<TodosStore>()((set, get) => ({
           description: record.description,
           dueDate: record.dueDate,
           completed: record.completed,
+          priority: record.priority,
         },
       ],
     }));
   },
 
-  updateTodo: async ({ id, text, description, dueDate }) => {
+  updateTodo: async ({ id, text, description, dueDate, priority }) => {
     const updatedTodo = await pb.collection('todos').update(id, {
       text: text,
       description: description,
       dueDate: dueDate,
+      priority: priority,
     });
 
     set((state) => ({
@@ -83,6 +89,7 @@ export const useTodos = create<TodosStore>()((set, get) => ({
               text: updatedTodo.text,
               description: updatedTodo.description,
               dueDate: updatedTodo.dueDate,
+              priority: updatedTodo.priority,
             }
           : todo
       ),

@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import styles from './App.module.css';
 import Button from './components/button/button';
 import TodoForm from './components/todo-form/todo-form';
 import TodoList from './components/to-do-list/to-do-list';
-import type { ITodo } from './types/ITodo';
+import type { ITodo, TodoPriority } from './types/ITodo';
 import { Modal } from './components/modal/modal';
 import TodoEditModal from './components/todo-edit-modal/todo-edit-modal';
 import { useTodos } from './store/todoStore';
@@ -27,10 +27,12 @@ function App() {
     text: editText,
     description: editDescription,
     dueDate: editDueDate,
+    priority: editPriority,
     error: editError,
     isSubmitDisabled: isEditSubmitDisabled,
     setDescription: setEditDescription,
     setDueDate: setEditDueDate,
+    setPriority: setEditPriority,
     open: openEditModal,
     close: closeEditModal,
     onTextChange: onEditTextChange,
@@ -40,6 +42,7 @@ function App() {
   const [text, setText] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +99,7 @@ function App() {
     setIsModalOpen(true);
     setText('');
     setDescription('');
+    setPriority('medium');
     setDueDate('');
     setTouched(false);
     setError(null);
@@ -105,6 +109,7 @@ function App() {
     setIsModalOpen(false);
     setText('');
     setDescription('');
+    setPriority('medium');
     setDueDate('');
     setTouched(false);
     setError(null);
@@ -161,7 +166,8 @@ function App() {
   async function addTodos(
     text: string,
     descriptionValue: string,
-    dateValue: string
+    dateValue: string,
+    priority: TodoPriority
   ) {
     if (!user) return;
     const trimmed = text.trim();
@@ -169,6 +175,7 @@ function App() {
     await addTodo({
       text: trimmed,
       description: trimmedDescription ? trimmedDescription : undefined,
+      priority: priority || 'medium',
       dueDate: dateValue || undefined,
       userId: user.id,
     });
@@ -210,7 +217,7 @@ function App() {
     setTouched(true);
     setError(nextError);
     if (nextError) return;
-    await addTodos(text, description, dueDate);
+    await addTodos(text, description, dueDate, priority);
     closeModal();
   }
 
@@ -257,10 +264,14 @@ function App() {
           Фиксируй задачи. Помогаем выполнять запланированное без хаоса и лишних
           усилий.
         </p>
-
-        <Button type="button" onClick={openModal}>
-          + Добавить задачу
-        </Button>
+        <div className={styles.topActions}>
+          <Button type="button" onClick={openModal}>
+            + Добавить задачу
+          </Button>
+          <Link className={styles.statsLink} to="/stats">
+            Моя статистика
+          </Link>
+        </div>
 
         {filteredTodos.length === 0 ? (
           <div className={styles.emptyState}>
@@ -327,11 +338,13 @@ function App() {
               text={text}
               description={description}
               dueDate={dueDate}
+              priority={priority}
               error={error}
               isSubmitDisabled={isSubmitDisabled}
               submitLabel="Добавить"
               onSubmit={handleSubmit}
               onCancel={closeModal}
+              onPriorityChange={setPriority}
               onTextChange={handleTextChange}
               onTextBlur={handleTextBlur}
               onDescriptionChange={setDescription}
@@ -345,6 +358,7 @@ function App() {
           text={editText}
           description={editDescription}
           dueDate={editDueDate}
+          priority={editPriority}
           error={editError}
           isSubmitDisabled={isEditSubmitDisabled}
           onSubmit={(e) => {
@@ -361,6 +375,7 @@ function App() {
           onTextChange={onEditTextChange}
           onTextBlur={onEditTextBlur}
           onDescriptionChange={setEditDescription}
+          onPriorityChange={setEditPriority}
           onDueDateChange={setEditDueDate}
           inputRef={editInputRef}
         />

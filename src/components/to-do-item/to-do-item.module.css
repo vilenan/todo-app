@@ -100,3 +100,37 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.priorityBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.priorityLow {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.priorityMedium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.priorityHigh {
+  background: #fee2e2;
+  color: #b91c1c;
+}
