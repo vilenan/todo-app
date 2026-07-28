@@ -2,7 +2,7 @@ import styles from './to-do-item.module.css';
 import Button from '../button/button';
 
 import type { ITodoItem } from '../../types/ITodoItem';
-import { getPriorityLabel, getPriorityClass } from '../../lib/toDoPriority';
+import { getPriorityLabel, getPriorityClass } from '../../lib/todoPriority';
 
 export function TodoItem({
   text,
