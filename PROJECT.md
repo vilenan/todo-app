@@ -1,13 +1,14 @@
-# Todo App
+# Todo App Frontend
 
-Одностраничное приложение для управления личными задачами.
+Клиентская часть приложения для управления личными задачами.
 
 ## Стек
 
 - React 19.2, TypeScript 5.9, Vite 7
 - React Router 7 для маршрутизации
 - Zustand 5 для состояния авторизации и задач
-- PocketBase как локальный backend по адресу `http://127.0.0.1:8090`
+- NestJS backend в соседнем проекте `../todo-backend`
+- Prisma + SQLite на backend
 - CSS Modules для стилей компонентов и страниц
 - ESLint 9, Prettier 3, Husky и lint-staged
 
@@ -18,9 +19,17 @@ npm install
 npm run dev
 ```
 
-Перед запуском frontend убедитесь, что PocketBase доступен по адресу
-`http://127.0.0.1:8090`. Клиент PocketBase настроен в
-`src/lib/pocketbase.ts`.
+Перед запуском frontend поднимите backend в соседней папке:
+
+```bash
+cd /Users/vilenan/Desktop/React/todo-backend
+npm install
+npm run start:dev
+```
+
+Frontend ожидает API по адресу `http://localhost:3000`.
+Базовый адрес backend задаётся через `VITE_API_URL` с fallback на
+`http://localhost:3000`.
 
 ## Команды
 
@@ -74,7 +83,6 @@ src/
     useEditModal.ts                # состояние и submit-flow редактирования
 
   lib/
-    pocketbase.ts                  # PocketBase client
     todoPriority.ts                # утилиты приоритетов задач
 
   pages/
@@ -84,15 +92,13 @@ src/
     TodoDetailsPage.tsx            # детали задачи
 
   store/
-    authStore.ts                   # авторизация через PocketBase
-    todoStore.ts                   # CRUD задач через PocketBase
+    authStore.ts                   # авторизация через NestJS API
+    todoStore.ts                   # CRUD задач через NestJS API
 
   types/
     ITodo.ts                       # тип задачи и приоритета
     ITodoItem.ts                   # props для элемента списка
 
-tools/
-  pocketbase/pb_migrations/        # миграции PocketBase
 ```
 
 ## Маршруты
@@ -111,15 +117,14 @@ tools/
 ## Как данные доходят до интерфейса
 
 ```text
-PocketBase
-  -> src/lib/pocketbase.ts
-    -> src/store/authStore.ts / src/store/todoStore.ts
-      -> src/App.tsx, src/pages/*
-        -> src/components/*
+NestJS API (todo-backend)
+  -> src/store/authStore.ts / src/store/todoStore.ts
+    -> src/App.tsx, src/pages/*
+      -> src/components/*
 ```
 
 Авторизация хранится в `authStore`. Задачи хранятся в `todoStore` и
-синхронизируются с коллекцией `todos` в PocketBase.
+синхронизируются через HTTP API backend.
 
 ## Работа с задачами
 
@@ -141,18 +146,24 @@ PocketBase
 - `clearAll`
 - `clearCompleted`
 
-## PocketBase
+## Backend API
 
-Frontend ожидает, что в PocketBase есть:
+Frontend использует NestJS backend из соседнего проекта
+`/Users/vilenan/Desktop/React/todo-backend`.
 
-- коллекция `users` для авторизации
-- коллекция `todos` для задач
+Для конфигурации frontend добавьте `.env` на основе `.env.example`.
 
-Миграции лежат в `tools/pocketbase/pb_migrations`. Не меняйте их без задачи на
-изменение схемы или данных.
+Основные маршруты:
+
+- `POST /auth/signup`
+- `POST /auth/login`
+- `GET /todos`
+- `POST /todos`
+- `PATCH /todos/:id`
+- `DELETE /todos/:id`
 
 Если авторизация или задачи не работают локально, сначала проверьте, запущен ли
-PocketBase на `http://127.0.0.1:8090`.
+backend на `http://localhost:3000`.
 
 ## Договорённости
 
@@ -162,11 +173,10 @@ PocketBase на `http://127.0.0.1:8090`.
 - Для стилей используйте CSS Modules рядом с компонентом или страницей.
 - Роуты добавляйте в `src/router.tsx`, если не требуется более крупный рефакторинг.
 - Query params `filter` и `edit` считаются частью поведения приложения.
-- Не меняйте base URL PocketBase без явного требования.
-- Не изменяйте миграции PocketBase без задачи на backend-схему.
+- Не меняйте frontend API URL без согласования с backend-конфигурацией.
+- Изменения DTO и auth-ответов согласовывайте с backend-кодом.
 
 ## Что полезно улучшить позже
 
-- Заменить стандартный `README.md` Vite на краткое описание приложения.
 - Добавить автоматические тесты для store-логики, auth flow и URL-фильтров.
 - Добавить обработку ошибок загрузки и сохранения задач в UI.

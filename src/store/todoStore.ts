@@ -1,9 +1,9 @@
 import { create } from 'zustand';
+import { API_URL } from '../config/api';
 import type { ITodo, TodoPriority } from '../types/ITodo';
-import { pb } from '../lib/pocketbase';
+import { useAuthStore } from './authStore';
 
 export type AddTodoPayload = {
-  userId: string;
   text: string;
   description?: string;
   dueDate?: string;
@@ -20,7 +20,7 @@ export type UpdateTodoPayload = {
 
 type TodosStore = {
   todos: ITodo[];
-  fetchTodos: (userId: string) => Promise<void>;
+  fetchTodos: () => Promise<void>;
   addTodo: (payload: AddTodoPayload) => Promise<void>;
   updateTodo: (payload: UpdateTodoPayload) => Promise<void>;
   removeTodo: (id: string) => Promise<void>;
@@ -29,75 +29,86 @@ type TodosStore = {
   clearCompleted: () => Promise<void>;
 };
 
+function getAuthHeaders() {
+  const token = useAuthStore.getState().token;
+
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+}
+
 export const useTodos = create<TodosStore>()((set, get) => ({
   todos: [],
 
-  fetchTodos: async (userId: string) => {
-    const records = await pb
-      .collection('todos')
-      .getFullList({ filter: `user = "${userId}"` });
-
-    set({
-      todos: records.map((record) => ({
-        id: record.id,
-        text: record.text,
-        description: record.description,
-        completed: record.completed,
-        dueDate: record.dueDate,
-        priority: record.priority,
-      })),
+  fetchTodos: async () => {
+    const response = await fetch(`${API_URL}/todos`, {
+      headers: getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      throw new Error('Не удалось загрузить задачи');
+    }
+    const todos: ITodo[] = await response.json();
+    set({ todos });
   },
 
-  addTodo: async ({ text, description, dueDate, userId, priority }) => {
-    const record = await pb.collection('todos').create({
-      user: userId,
-      text,
-      description,
-      dueDate,
-      completed: false,
-      priority,
+  addTodo: async ({ text, description, dueDate, priority }) => {
+    const response = await fetch(`${API_URL}/todos`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        text,
+        description,
+        dueDate,
+        priority,
+      }),
     });
+
+    if (!response.ok) {
+      throw new Error('Не удалось создать задачу');
+    }
+
+    const createTodo: ITodo = await response.json();
+
     set((state) => ({
-      todos: [
-        ...state.todos,
-        {
-          id: record.id,
-          text: record.text,
-          description: record.description,
-          dueDate: record.dueDate,
-          completed: record.completed,
-          priority: record.priority,
-        },
-      ],
+      todos: [createTodo, ...state.todos],
     }));
   },
 
   updateTodo: async ({ id, text, description, dueDate, priority }) => {
-    const updatedTodo = await pb.collection('todos').update(id, {
-      text: text,
-      description: description,
-      dueDate: dueDate,
-      priority: priority,
+    const response = await fetch(`${API_URL}/todos/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        text,
+        description,
+        dueDate,
+        priority,
+      }),
     });
 
+    if (!response.ok) {
+      throw new Error('Не удалось обновить задачу');
+    }
+
+    const updatedTodo: ITodo = await response.json();
+
     set((state) => ({
-      todos: state.todos.map((todo) =>
-        todo.id === id
-          ? {
-              ...todo,
-              text: updatedTodo.text,
-              description: updatedTodo.description,
-              dueDate: updatedTodo.dueDate,
-              priority: updatedTodo.priority,
-            }
-          : todo
-      ),
+      todos: state.todos.map((todo) => (todo.id === id ? updatedTodo : todo)),
     }));
   },
 
   removeTodo: async (id) => {
-    await pb.collection('todos').delete(id);
+    const response = await fetch(`${API_URL}/todos/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Не удалось удалить задачу');
+    }
+
     set((state) => ({
       todos: state.todos.filter((todo) => todo.id !== id),
     }));
@@ -107,9 +118,19 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     const todo = get().todos.find((todo) => todo.id === id);
     if (!todo) return;
 
-    const updatedTodo = await pb
-      .collection('todos')
-      .update(id, { completed: !todo.completed });
+    const response = await fetch(`${API_URL}/todos/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        completed: !todo.completed,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Не удалось изменить статус задачи');
+    }
+
+    const updatedTodo: ITodo = await response.json();
 
     set((state) => ({
       todos: state.todos.map((todo) =>
@@ -121,7 +142,12 @@ export const useTodos = create<TodosStore>()((set, get) => ({
   clearAll: async () => {
     const todos = get().todos;
     await Promise.all(
-      todos.map((todo) => pb.collection('todos').delete(todo.id))
+      todos.map((todo) => {
+        fetch(`${API_URL}/todos/${todo.id}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+        });
+      })
     );
     set({ todos: [] });
   },
@@ -130,7 +156,12 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     const completedTodos = get().todos.filter((todo) => todo.completed);
     if (completedTodos.length === 0) return;
     await Promise.all(
-      completedTodos.map((todo) => pb.collection('todos').delete(todo.id))
+      completedTodos.map((todo) => {
+        fetch(`${API_URL}/todos/${todo.id}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+        });
+      })
     );
 
     set((state) => ({

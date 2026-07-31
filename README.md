@@ -1,73 +1,130 @@
-# React + TypeScript + Vite
+# Todo App Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Фронтенд приложения для управления задачами.
 
-Currently, two official plugins are available:
+## Что находится в этом репозитории
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Этот репозиторий содержит клиентскую часть приложения на React + TypeScript.
+Backend вынесен в соседний проект NestJS:
 
-## React Compiler
+- frontend: `/Users/vilenan/Desktop/React/todo-app`
+- backend: `/Users/vilenan/Desktop/React/todo-backend`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Стек
 
-## Expanding the ESLint configuration
+- React 19
+- TypeScript 5
+- Vite 7
+- React Router 7
+- Zustand 5
+- CSS Modules
+- ESLint 9
+- Prettier 3
+- Husky
+- lint-staged
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Архитектура
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Сейчас приложение разделено на две части:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- `todo-app` — frontend на React/Vite
+- `todo-backend` — backend на NestJS + Prisma + SQLite
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Фронтенд отправляет запросы в Nest API по адресу `http://localhost:3000`.
+В backend включён CORS для `http://localhost:5173`.
+
+Базовый URL backend на фронтенде настраивается через `VITE_API_URL`.
+
+## Команды
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Для локальной настройки можно создать `.env` на основе примера:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
+
+Дополнительно:
+
+- `npm run build` — сборка frontend
+- `npm run lint` — проверка ESLint
+- `npm run preview` — локальный preview production-сборки
+
+Пример значения:
+
+```bash
+VITE_API_URL=http://localhost:3000
+```
+
+Для локальной разработки backend запускается в соседней папке:
+
+```bash
+cd /Users/vilenan/Desktop/React/todo-backend
+npm install
+npm run start:dev
+```
+
+## Что умеет текущий frontend
+
+- регистрация и вход пользователя
+- защищённая зона приложения
+- создание, редактирование и удаление задач
+- переключение статуса выполнения
+- фильтрация задач через query param `filter`
+- открытие редактирования через query param `edit`
+- страница статистики
+- lazy-loaded страница деталей задачи
+
+## Структура проекта
+
+```text
+src/
+  main.tsx
+  router.tsx
+  AppLayout.tsx
+  App.tsx
+
+  components/
+  hooks/
+  lib/
+  pages/
+  store/
+  types/
+```
+
+Ключевые места:
+
+- `src/router.tsx` — маршруты
+- `src/AppLayout.tsx` — защищённая оболочка
+- `src/App.tsx` — основной экран списка задач
+- `src/store/authStore.ts` — auth state
+- `src/store/todoStore.ts` — todo state
+- `src/store/*` — здесь находится вся интеграция с backend API
+
+## API, которые использует frontend
+
+Авторизация:
+
+- `POST /auth/signup`
+- `POST /auth/login`
+
+Задачи:
+
+- `GET /todos`
+- `POST /todos`
+- `PATCH /todos/:id`
+- `DELETE /todos/:id`
+
+Токен хранится во frontend в `localStorage` и отправляется в заголовке
+`Authorization: Bearer <token>`.
+
+## Рекомендация по следующему шагу
+
+Следующее полезное улучшение для frontend:
+
+- при желании выделить отдельный API-layer поверх `fetch`
+- добавить обработку ошибок загрузки и сохранения задач в UI

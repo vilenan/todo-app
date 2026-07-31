@@ -55,7 +55,7 @@ function App() {
 
   useEffect(() => {
     if (!user) return;
-    void fetchTodos(user.id);
+    void fetchTodos();
   }, [fetchTodos, user]);
 
   //Добавила состояние фильтра
@@ -177,7 +177,6 @@ function App() {
       description: trimmedDescription ? trimmedDescription : undefined,
       priority: priority || 'medium',
       dueDate: dateValue || undefined,
-      userId: user.id,
     });
   }
 

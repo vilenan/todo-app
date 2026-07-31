@@ -9,7 +9,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
   // Игнорируем dist
-  globalIgnores(['dist', 'tools/pocketbase/**']),
+  globalIgnores(['dist']),
 
   {
     files: ['**/*.{ts,tsx}'], // Линтим TS и TSX
