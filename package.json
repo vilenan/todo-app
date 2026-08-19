@@ -5,6 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "npm --prefix backend run start:dev",
+    "build:backend": "npm --prefix backend run build",
+    "generate:backend": "npm --prefix backend run prisma:generate",
+    "lint:backend": "npm --prefix backend run lint",
+    "test:backend": "npm --prefix backend run test",
+    "install:all": "npm install && npm --prefix backend install",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

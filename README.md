@@ -1,130 +1,65 @@
-# Todo App Frontend
+# Todo App
 
-Фронтенд приложения для управления задачами.
+Монорепозиторий приложения для управления задачами: React/Vite frontend и
+NestJS/Prisma backend находятся в одном проекте.
 
-## Что находится в этом репозитории
+## Структура
 
-Этот репозиторий содержит клиентскую часть приложения на React + TypeScript.
-Backend вынесен в соседний проект NestJS:
+- `src/` — frontend на React, TypeScript, Vite и Zustand
+- `backend/` — backend на NestJS, Prisma и SQLite
 
-- frontend: `/Users/vilenan/Desktop/React/todo-app`
-- backend: `/Users/vilenan/Desktop/React/todo-backend`
+Сервисы запускаются на `http://localhost:5173` и `http://localhost:3000`.
+Frontend получает URL API из `VITE_API_URL` (по умолчанию —
+`http://localhost:3000`).
 
-## Стек
+## Установка и запуск
 
-- React 19
-- TypeScript 5
-- Vite 7
-- React Router 7
-- Zustand 5
-- CSS Modules
-- ESLint 9
-- Prettier 3
-- Husky
-- lint-staged
-
-## Архитектура
-
-Сейчас приложение разделено на две части:
-
-- `todo-app` — frontend на React/Vite
-- `todo-backend` — backend на NestJS + Prisma + SQLite
-
-Фронтенд отправляет запросы в Nest API по адресу `http://localhost:3000`.
-В backend включён CORS для `http://localhost:5173`.
-
-Базовый URL backend на фронтенде настраивается через `VITE_API_URL`.
-
-## Команды
+Из корня репозитория:
 
 ```bash
-npm install
-npm run dev
-```
-
-Для локальной настройки можно создать `.env` на основе примера:
-
-```bash
+npm run install:all
 cp .env.example .env
 ```
 
-Дополнительно:
+В первом терминале запустите backend:
 
+```bash
+npm run dev:backend
+```
+
+Во втором терминале запустите frontend:
+
+```bash
+npm run dev
+```
+
+Откройте `http://localhost:5173`. Backend использует локальную SQLite-базу
+`backend/dev.db`; переменные backend хранятся в `backend/.env`.
+
+## Команды
+
+- `npm run dev` — frontend
+- `npm run dev:backend` — backend в watch-режиме
 - `npm run build` — сборка frontend
-- `npm run lint` — проверка ESLint
-- `npm run preview` — локальный preview production-сборки
+- `npm run build:backend` — сборка backend
+- `npm run generate:backend` — генерация Prisma Client
+- `npm run lint` — проверка frontend
+- `npm run lint:backend` — проверка backend
+- `npm run test:backend` — тесты backend
+- `npm run preview` — preview frontend-сборки
 
-Пример значения:
-
-```bash
-VITE_API_URL=http://localhost:3000
-```
-
-Для локальной разработки backend запускается в соседней папке:
-
-```bash
-cd /Users/vilenan/Desktop/React/todo-backend
-npm install
-npm run start:dev
-```
-
-## Что умеет текущий frontend
+## Возможности
 
 - регистрация и вход пользователя
-- защищённая зона приложения
-- создание, редактирование и удаление задач
-- переключение статуса выполнения
-- фильтрация задач через query param `filter`
-- открытие редактирования через query param `edit`
-- страница статистики
-- lazy-loaded страница деталей задачи
+- создание, редактирование, удаление и просмотр задач
+- статусы, приоритеты, фильтры и статистика
+- защищённые маршруты и JWT-аутентификация
 
-## Структура проекта
-
-```text
-src/
-  main.tsx
-  router.tsx
-  AppLayout.tsx
-  App.tsx
-
-  components/
-  hooks/
-  lib/
-  pages/
-  store/
-  types/
-```
-
-Ключевые места:
-
-- `src/router.tsx` — маршруты
-- `src/AppLayout.tsx` — защищённая оболочка
-- `src/App.tsx` — основной экран списка задач
-- `src/store/authStore.ts` — auth state
-- `src/store/todoStore.ts` — todo state
-- `src/store/*` — здесь находится вся интеграция с backend API
-
-## API, которые использует frontend
-
-Авторизация:
+## API
 
 - `POST /auth/signup`
 - `POST /auth/login`
-
-Задачи:
-
 - `GET /todos`
 - `POST /todos`
 - `PATCH /todos/:id`
 - `DELETE /todos/:id`
-
-Токен хранится во frontend в `localStorage` и отправляется в заголовке
-`Authorization: Bearer <token>`.
-
-## Рекомендация по следующему шагу
-
-Следующее полезное улучшение для frontend:
-
-- при желании выделить отдельный API-layer поверх `fetch`
-- добавить обработку ошибок загрузки и сохранения задач в UI

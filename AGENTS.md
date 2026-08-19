@@ -8,29 +8,33 @@ must be verified before changing code or documentation.
 
 ## Current State
 
-- This repository contains the frontend application
+- This repository is a monorepo containing the frontend and backend
 - Frontend stack: React 19, TypeScript, Vite, React Router, Zustand
 - Product domain: todo application with auth, task CRUD, filters, statistics, and task details
-- Backend now lives in the sibling repository `/Users/vilenan/Desktop/React/todo-backend`
+- Backend lives in the `backend/` directory in this repository
 - Frontend talks to the NestJS API at `http://localhost:3000`
 
 ## Architecture Notes
 
-- Treat this repo as the frontend client
-- The backend is a separate NestJS + Prisma service in the sibling `todo-backend` folder
+- Treat the root as the frontend client and `backend/` as the NestJS + Prisma service
 - Do not reintroduce PocketBase files or dependencies unless the task explicitly requires rollback
 
 ## Commands Available In This Repo
 
-- Install dependencies: `npm install`
+- Install dependencies: `npm run install:all`
 - Start dev server: `npm run dev`
 - Build frontend: `npm run build`
 - Run lint: `npm run lint`
 - Preview production build: `npm run preview`
+- Start backend: `npm run dev:backend`
+- Build backend: `npm run build:backend`
+- Generate Prisma Client: `npm run generate:backend`
+- Lint backend: `npm run lint:backend`
+- Test backend: `npm run test:backend`
 
 ## External Backend Contract
 
-- Backend repo: `/Users/vilenan/Desktop/React/todo-backend`
+- Backend directory: `backend/`
 - Backend dev URL: `http://localhost:3000`
 - Frontend env var for backend URL: `VITE_API_URL`
 - Allowed frontend origin configured in backend: `http://localhost:5173`
@@ -58,10 +62,10 @@ must be verified before changing code or documentation.
 
 ## Backend Coordination Guidance
 
-- Backend ownership now sits in the sibling `todo-backend` project
+- Backend ownership now sits in `backend/`
 - If frontend API shapes change, update both:
   - frontend stores in this repo
-  - backend controllers, DTOs, and services in `todo-backend`
+  - backend controllers, DTOs, and services in `backend/`
 - Keep auth token handling aligned with the backend JWT contract
 - If backend URL or CORS origin changes, update docs and frontend API configuration together
 
