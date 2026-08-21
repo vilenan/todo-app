@@ -28,15 +28,56 @@ type AuthStore = {
   clearError: () => void;
 };
 
+let initAuthPromise: Promise<void> | null = null;
+
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   token: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   error: null,
 
   initAuth: async () => {
-    set({ user: null, token: null, isAuthenticated: false });
+    if (initAuthPromise) {
+      return initAuthPromise;
+    }
+
+    initAuthPromise = (async () => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const response = await fetch(`${API_URL}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error();
+        }
+
+        const data: AuthResponse = await response.json();
+
+        set({
+          token: data.accessToken,
+          user: data.user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } catch {
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      }
+    })();
+
+    try {
+      await initAuthPromise;
+    } finally {
+      initAuthPromise = null;
+    }
   },
 
   login: async (email, password) => {
