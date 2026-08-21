@@ -3,8 +3,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { createHash, randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto } from './dto/auth.dto';
 
@@ -13,6 +15,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async signup(dto: AuthDto) {
@@ -57,18 +60,50 @@ export class AuthService {
     return this.createAuthResponse(user.id, user.email);
   }
 
-  private createAuthResponse(userId: string, email: string) {
+  private async createAuthResponse(userId: string, email: string) {
     const accessToken = this.jwtService.sign({
       sub: userId,
       email,
     });
 
+    const refreshToken = randomBytes(cryptoTokenBytes).toString('hex');
+    const refreshTokenExpiresAt = new Date(
+      Date.now() +
+        this.parseDuration(
+          this.configService.get<string>('REFRESH_TOKEN_EXPIRES_IN', '30d'),
+        ),
+    );
+
+    await this.prisma.refreshToken.create({
+      data: {
+        tokenHash: this.hashToken(refreshToken),
+        userId,
+        expiresAt: refreshTokenExpiresAt,
+      },
+    });
+
     return {
       accessToken,
+      refreshToken,
+      refreshTokenExpiresAt,
       user: {
         id: userId,
         email,
       },
     };
   }
+
+  private hashToken(token: string) {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
+  private parseDuration(value: string) {
+    const match = /^(\d+)([smhd])$/.exec(value);
+    if (!match) throw new Error(`Invalid token duration: ${value}`);
+
+    const units = { s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 };
+    return Number(match[1]) * units[match[2] as keyof typeof units];
+  }
 }
+
+const cryptoTokenBytes = 32;
