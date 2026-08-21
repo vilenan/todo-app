@@ -60,6 +60,40 @@ export class AuthService {
     return this.createAuthResponse(user.id, user.email);
   }
 
+  async refresh(refreshToken: string) {
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash: this.hashToken(refreshToken) },
+      include: { user: true },
+    });
+
+    if (
+      !storedToken ||
+      storedToken.revokedAt ||
+      storedToken.expiresAt <= new Date()
+    ) {
+      throw new UnauthorizedException('Refresh token недействителен');
+    }
+
+    await this.prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { revokedAt: new Date() },
+    });
+
+    return this.createAuthResponse(storedToken.user.id, storedToken.user.email);
+  }
+
+  async logout(refreshToken: string | undefined) {
+    if (!refreshToken) return;
+
+    await this.prisma.refreshToken.updateMany({
+      where: {
+        tokenHash: this.hashToken(refreshToken),
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
+    });
+  }
+
   private async createAuthResponse(userId: string, email: string) {
     const accessToken = this.jwtService.sign({
       sub: userId,
