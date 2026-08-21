@@ -36,19 +36,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   error: null,
 
   initAuth: async () => {
-    const token = localStorage.getItem('token');
-    const userJson = localStorage.getItem('user');
-
-    if (!token || !userJson) {
-      set({ user: null, token: null, isAuthenticated: false });
-      return;
-    }
-
-    set({
-      token,
-      user: JSON.parse(userJson),
-      isAuthenticated: true,
-    });
+    set({ user: null, token: null, isAuthenticated: false });
   },
 
   login: async (email, password) => {
@@ -57,6 +45,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -66,9 +55,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error();
       }
       const data: AuthResponse = await response.json();
-
-      localStorage.setItem('token', data.accessToken);
-      localStorage.setItem('user', JSON.stringify(data.user));
 
       set({
         token: data.accessToken,
@@ -95,6 +81,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     try {
       const response = await fetch(`${API_URL}/auth/signup`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -106,9 +93,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       }
 
       const data: AuthResponse = await response.json();
-
-      localStorage.setItem('token', data.accessToken);
-      localStorage.setItem('user', JSON.stringify(data.user));
 
       set({
         user: data.user,
@@ -126,8 +110,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    void fetch(`${API_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+
     set({
       user: null,
       token: null,
