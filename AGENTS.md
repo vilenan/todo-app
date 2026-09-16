@@ -13,6 +13,8 @@ must be verified before changing code or documentation.
 - Product domain: todo application with auth, task CRUD, filters, statistics, and task details
 - Backend lives in the `backend/` directory in this repository
 - Frontend talks to the NestJS API at `http://localhost:3000`
+- Authentication uses short-lived access JWTs in frontend memory and refresh
+  tokens in `HttpOnly` cookies; tokens are not stored in `localStorage`
 
 ## Architecture Notes
 
@@ -41,6 +43,8 @@ must be verified before changing code or documentation.
 - Auth endpoints used by frontend:
   - `POST /auth/signup`
   - `POST /auth/login`
+  - `POST /auth/refresh`
+  - `POST /auth/logout`
 - Todo endpoints used by frontend:
   - `GET /todos`
   - `POST /todos`
@@ -67,6 +71,8 @@ must be verified before changing code or documentation.
   - frontend stores in this repo
   - backend controllers, DTOs, and services in `backend/`
 - Keep auth token handling aligned with the backend JWT contract
+- Keep `credentials: 'include'` on requests that need the refresh cookie
+- Keep refresh token hashes in the database; never expose or persist raw refresh tokens server-side
 - If backend URL or CORS origin changes, update docs and frontend API configuration together
 
 ## Working Conventions

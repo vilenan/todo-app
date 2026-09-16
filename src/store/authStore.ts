@@ -18,6 +18,7 @@ type AuthStore = {
   isLoading: boolean;
   error: string | null;
   initAuth: () => Promise<void>;
+  refreshAccessToken: () => Promise<string>;
   login: (email: string, password: string) => Promise<void>;
   signUp: (
     email: string,
@@ -29,13 +30,45 @@ type AuthStore = {
 };
 
 let initAuthPromise: Promise<void> | null = null;
+let refreshAccessTokenPromise: Promise<string> | null = null;
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   token: null,
   isAuthenticated: false,
   isLoading: true,
   error: null,
+
+  refreshAccessToken: async () => {
+    if (refreshAccessTokenPromise) {
+      return refreshAccessTokenPromise;
+    }
+
+    refreshAccessTokenPromise = (async () => {
+      const response = await fetch(`${API_URL}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Не удалось обновить access token');
+      }
+
+      const data: AuthResponse = await response.json();
+      set({
+        token: data.accessToken,
+        user: data.user,
+        isAuthenticated: true,
+      });
+      return data.accessToken;
+    })();
+
+    try {
+      return await refreshAccessTokenPromise;
+    } finally {
+      refreshAccessTokenPromise = null;
+    }
+  },
 
   initAuth: async () => {
     if (initAuthPromise) {
@@ -46,23 +79,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({ isLoading: true, error: null });
 
       try {
-        const response = await fetch(`${API_URL}/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          throw new Error();
-        }
-
-        const data: AuthResponse = await response.json();
-
-        set({
-          token: data.accessToken,
-          user: data.user,
-          isAuthenticated: true,
-          isLoading: false,
-        });
+        await get().refreshAccessToken();
+        set({ isLoading: false });
       } catch {
         set({
           user: null,

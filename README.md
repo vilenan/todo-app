@@ -55,11 +55,30 @@ npm run dev
 - статусы, приоритеты, фильтры и статистика
 - защищённые маршруты и JWT-аутентификация
 
+## Аутентификация
+
+После входа backend возвращает короткоживущий access JWT. Frontend хранит его
+только в памяти Zustand и использует в заголовке `Authorization: Bearer ...`.
+
+Долгоживущий refresh token устанавливается backend в `HttpOnly` cookie. Его
+нельзя прочитать из JavaScript или через `localStorage`. При запуске приложения
+и после истечения access token frontend вызывает `/auth/refresh`; backend
+проверяет cookie, ротирует refresh token и выдаёт новый access token.
+
+При logout refresh-сессия отзывается в базе, а cookie очищается.
+
 ## API
 
 - `POST /auth/signup`
 - `POST /auth/login`
+- `POST /auth/refresh`
+- `POST /auth/logout`
 - `GET /todos`
 - `POST /todos`
 - `PATCH /todos/:id`
 - `DELETE /todos/:id`
+
+Для локальной разработки backend разрешает CORS для
+`http://localhost:5173` и credentials-запросы для refresh cookie.
+
+Подтверждение email и отправка писем через Resend пока не подключены.

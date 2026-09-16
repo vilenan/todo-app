@@ -7,7 +7,7 @@ NestJS backend для приложения управления задачами
 - NestJS 11
 - Prisma 7
 - SQLite
-- JWT auth
+- JWT auth with access/refresh tokens
 - bcrypt
 
 ## Связанный frontend
@@ -58,6 +58,8 @@ npm run dev:backend
 
 - `POST /auth/signup`
 - `POST /auth/login`
+- `POST /auth/refresh`
+- `POST /auth/logout`
 
 Задачи:
 
@@ -77,6 +79,7 @@ Prisma schema лежит в `prisma/schema.prisma`.
 
 - `User`
 - `Todo`
+- `RefreshToken`
 
 Для локальной разработки используется SQLite.
 
@@ -93,6 +96,23 @@ Frontend использует auth response формата:
   }
 }
 ```
+
+После `signup` и `login` backend также устанавливает refresh token в
+`HttpOnly` cookie `refresh_token`. Сырой refresh token не сохраняется в базе —
+хранится только его SHA-256 хэш.
+
+`POST /auth/refresh` читает cookie, проверяет срок действия и отзыв, отзывает
+старую refresh-сессию и выдаёт новую пару access/refresh token. `POST
+/auth/logout` отзывает текущую refresh-сессию и очищает cookie.
+
+Сроки задаются в `backend/.env`:
+
+```env
+ACCESS_TOKEN_EXPIRES_IN="15m"
+REFRESH_TOKEN_EXPIRES_IN="30d"
+```
+
+Подтверждение email и Resend пока не входят в реализованный backend-контракт.
 
 Todo routes должны возвращать данные, совместимые с типом задачи во frontend:
 

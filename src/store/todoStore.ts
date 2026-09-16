@@ -38,13 +38,46 @@ function getAuthHeaders() {
   };
 }
 
+async function fetchWithRefresh(
+  url: string,
+  init: Omit<RequestInit, 'headers'> = {}
+) {
+  let response = await fetch(url, {
+    ...init,
+    credentials: 'include',
+    headers: getAuthHeaders(),
+  });
+
+  if (response.status === 401) {
+    try {
+      await useAuthStore.getState().refreshAccessToken();
+    } catch {
+      useAuthStore.getState().logout();
+      window.location.assign('/login');
+      throw new Error('Сессия истекла. Выполните вход снова.');
+    }
+
+    response = await fetch(url, {
+      ...init,
+      credentials: 'include',
+      headers: getAuthHeaders(),
+    });
+
+    if (response.status === 401) {
+      useAuthStore.getState().logout();
+      window.location.assign('/login');
+      throw new Error('Сессия истекла. Выполните вход снова.');
+    }
+  }
+
+  return response;
+}
+
 export const useTodos = create<TodosStore>()((set, get) => ({
   todos: [],
 
   fetchTodos: async () => {
-    const response = await fetch(`${API_URL}/todos`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetchWithRefresh(`${API_URL}/todos`);
 
     if (!response.ok) {
       throw new Error('Не удалось загрузить задачи');
@@ -54,9 +87,8 @@ export const useTodos = create<TodosStore>()((set, get) => ({
   },
 
   addTodo: async ({ text, description, dueDate, priority }) => {
-    const response = await fetch(`${API_URL}/todos`, {
+    const response = await fetchWithRefresh(`${API_URL}/todos`, {
       method: 'POST',
-      headers: getAuthHeaders(),
       body: JSON.stringify({
         text,
         description,
@@ -77,9 +109,8 @@ export const useTodos = create<TodosStore>()((set, get) => ({
   },
 
   updateTodo: async ({ id, text, description, dueDate, priority }) => {
-    const response = await fetch(`${API_URL}/todos/${id}`, {
+    const response = await fetchWithRefresh(`${API_URL}/todos/${id}`, {
       method: 'PATCH',
-      headers: getAuthHeaders(),
       body: JSON.stringify({
         text,
         description,
@@ -100,9 +131,8 @@ export const useTodos = create<TodosStore>()((set, get) => ({
   },
 
   removeTodo: async (id) => {
-    const response = await fetch(`${API_URL}/todos/${id}`, {
+    const response = await fetchWithRefresh(`${API_URL}/todos/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -118,9 +148,8 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     const todo = get().todos.find((todo) => todo.id === id);
     if (!todo) return;
 
-    const response = await fetch(`${API_URL}/todos/${id}`, {
+    const response = await fetchWithRefresh(`${API_URL}/todos/${id}`, {
       method: 'PATCH',
-      headers: getAuthHeaders(),
       body: JSON.stringify({
         completed: !todo.completed,
       }),
@@ -143,9 +172,8 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     const todos = get().todos;
     await Promise.all(
       todos.map((todo) => {
-        fetch(`${API_URL}/todos/${todo.id}`, {
+        fetchWithRefresh(`${API_URL}/todos/${todo.id}`, {
           method: 'DELETE',
-          headers: getAuthHeaders(),
         });
       })
     );
@@ -157,9 +185,8 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     if (completedTodos.length === 0) return;
     await Promise.all(
       completedTodos.map((todo) => {
-        fetch(`${API_URL}/todos/${todo.id}`, {
+        fetchWithRefresh(`${API_URL}/todos/${todo.id}`, {
           method: 'DELETE',
-          headers: getAuthHeaders(),
         });
       })
     );
