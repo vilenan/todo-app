@@ -172,7 +172,7 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     const todos = get().todos;
     await Promise.all(
       todos.map((todo) => {
-        fetchWithRefresh(`${API_URL}/todos/${todo.id}`, {
+        return fetchWithRefresh(`${API_URL}/todos/${todo.id}`, {
           method: 'DELETE',
         });
       })
@@ -185,7 +185,7 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     if (completedTodos.length === 0) return;
     await Promise.all(
       completedTodos.map((todo) => {
-        fetchWithRefresh(`${API_URL}/todos/${todo.id}`, {
+        return fetchWithRefresh(`${API_URL}/todos/${todo.id}`, {
           method: 'DELETE',
         });
       })
