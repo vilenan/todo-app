@@ -3,11 +3,13 @@ import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
 
 export default function AppLayout() {
-  const { user, initAuth, isLoading } = useAuthStore();
+  const { user, token, initAuth, isLoading } = useAuthStore();
 
   useEffect(() => {
+    if (token) return;
+
     initAuth();
-  }, [initAuth]);
+  }, [initAuth, token]);
   if (isLoading) return <p>Идет проверка</p>;
 
   if (!user && !isLoading) {
