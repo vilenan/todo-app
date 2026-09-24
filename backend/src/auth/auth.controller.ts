@@ -9,6 +9,7 @@ import {
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -44,6 +45,11 @@ export class AuthController {
 
     const authResponse = await this.authService.refresh(refreshToken);
     return this.withRefreshCookie(authResponse, response);
+  }
+
+  @Post('verify-email')
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
   }
 
   @Post('logout')

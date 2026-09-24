@@ -263,6 +263,11 @@ function App() {
           Фиксируй задачи. Помогаем выполнять запланированное без хаоса и лишних
           усилий.
         </p>
+        {!user?.emailVerified && (
+          <p className={styles.verificationNotice}>
+            Подтвердите email по ссылке из письма, чтобы завершить регистрацию.
+          </p>
+        )}
         <div className={styles.topActions}>
           <Button type="button" onClick={openModal}>
             + Добавить задачу

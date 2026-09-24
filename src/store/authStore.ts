@@ -4,6 +4,7 @@ import { API_URL } from '../config/api';
 type User = {
   id: string;
   email: string;
+  emailVerified: boolean;
 };
 
 type AuthResponse = {
@@ -25,6 +26,7 @@ type AuthStore = {
     password: string,
     passwordConfirm: string
   ) => Promise<void>;
+  verifyEmail: (token: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
 };
@@ -166,6 +168,26 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       });
       return;
     }
+  },
+
+  verifyEmail: async (token) => {
+    const response = await fetch(`${API_URL}/auth/verify-email`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Ссылка подтверждения недействительна или истекла');
+    }
+
+    const data: { user: User } = await response.json();
+    set((state) => ({
+      user: state.user?.id === data.user.id ? data.user : state.user,
+    }));
   },
 
   logout: () => {

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -9,6 +10,13 @@ import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto } from './dto/auth.dto';
+import { EmailService } from './email.service';
+
+type AuthUser = {
+  id: string;
+  email: string;
+  emailVerifiedAt: Date | null;
+};
 
 @Injectable()
 export class AuthService {
@@ -16,6 +24,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async signup(dto: AuthDto) {
@@ -36,7 +45,18 @@ export class AuthService {
       },
     });
 
-    return this.createAuthResponse(user.id, user.email);
+    try {
+      const verificationToken = await this.createVerificationToken(user.id);
+      await this.emailService.sendVerificationEmail(
+        user.email,
+        verificationToken,
+      );
+
+      return this.createAuthResponse(user);
+    } catch (error) {
+      await this.prisma.user.delete({ where: { id: user.id } });
+      throw error;
+    }
   }
 
   async login(dto: AuthDto) {
@@ -57,7 +77,7 @@ export class AuthService {
       throw new UnauthorizedException('Неверный email или пароль');
     }
 
-    return this.createAuthResponse(user.id, user.email);
+    return this.createAuthResponse(user);
   }
 
   async refresh(refreshToken: string) {
@@ -79,7 +99,45 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
-    return this.createAuthResponse(storedToken.user.id, storedToken.user.email);
+    return this.createAuthResponse(storedToken.user);
+  }
+
+  async verifyEmail(token: string) {
+    const tokenHash = this.hashToken(token);
+
+    return this.prisma.$transaction(async (tx) => {
+      const storedToken = await tx.emailVerificationToken.findUnique({
+        where: { tokenHash },
+      });
+
+      if (
+        !storedToken ||
+        storedToken.revokedAt ||
+        storedToken.expiresAt <= new Date()
+      ) {
+        throw new BadRequestException(
+          'Ссылка подтверждения недействительна или истекла',
+        );
+      }
+
+      const revoked = await tx.emailVerificationToken.updateMany({
+        where: { id: storedToken.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+
+      if (revoked.count === 0) {
+        throw new BadRequestException(
+          'Ссылка подтверждения недействительна или истекла',
+        );
+      }
+
+      const user = await tx.user.update({
+        where: { id: storedToken.userId },
+        data: { emailVerifiedAt: new Date() },
+      });
+
+      return { user: this.toAuthUser(user) };
+    });
   }
 
   async logout(refreshToken: string | undefined) {
@@ -94,10 +152,10 @@ export class AuthService {
     });
   }
 
-  private async createAuthResponse(userId: string, email: string) {
+  private async createAuthResponse(user: AuthUser) {
     const accessToken = this.jwtService.sign({
-      sub: userId,
-      email,
+      sub: user.id,
+      email: user.email,
     });
 
     const refreshToken = randomBytes(cryptoTokenBytes).toString('hex');
@@ -111,7 +169,7 @@ export class AuthService {
     await this.prisma.refreshToken.create({
       data: {
         tokenHash: this.hashToken(refreshToken),
-        userId,
+        userId: user.id,
         expiresAt: refreshTokenExpiresAt,
       },
     });
@@ -120,10 +178,38 @@ export class AuthService {
       accessToken,
       refreshToken,
       refreshTokenExpiresAt,
-      user: {
-        id: userId,
-        email,
+      user: this.toAuthUser(user),
+    };
+  }
+
+  private async createVerificationToken(userId: string) {
+    const token = randomBytes(cryptoTokenBytes).toString('hex');
+    const expiresAt = new Date(
+      Date.now() +
+        this.parseDuration(
+          this.configService.get<string>(
+            'EMAIL_VERIFICATION_TOKEN_EXPIRES_IN',
+            '24h',
+          ),
+        ),
+    );
+
+    await this.prisma.emailVerificationToken.create({
+      data: {
+        tokenHash: this.hashToken(token),
+        userId,
+        expiresAt,
       },
+    });
+
+    return token;
+  }
+
+  private toAuthUser(user: AuthUser) {
+    return {
+      id: user.id,
+      email: user.email,
+      emailVerified: user.emailVerifiedAt !== null,
     };
   }
 

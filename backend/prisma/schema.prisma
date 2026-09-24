@@ -13,16 +13,31 @@ enum TodoPriority {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  todos        Todo[]
+  id                      String                   @id @default(cuid())
+  email                   String                   @unique
+  passwordHash            String
+  emailVerifiedAt         DateTime?
+  todos                   Todo[]
   refreshTokens RefreshToken[]
+  emailVerificationTokens EmailVerificationToken[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model RefreshToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerificationToken {
   id        String   @id @default(cuid())
   tokenHash String   @unique
   userId    String
