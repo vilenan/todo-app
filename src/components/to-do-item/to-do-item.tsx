@@ -1,5 +1,6 @@
 import styles from './to-do-item.module.css';
 import Button from '../button/button';
+import { formatDate } from '../../lib/formatDate';
 
 import type { ITodoItem } from '../../types/ITodoItem';
 import { getPriorityLabel, getPriorityClass } from '../../lib/todoPriority';
@@ -33,7 +34,7 @@ export function TodoItem({
           {text}
         </span>
         <div className={styles.metaRow}>
-          {dueDate && <p className={styles.due}>Срок: {dueDate}</p>}
+          {dueDate && <p className={styles.due}>Срок: {formatDate(dueDate)}</p>}
           <span
             className={`${styles.priorityBadge} ${styles[getPriorityClass(priority)]}`}
           >

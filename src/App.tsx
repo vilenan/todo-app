@@ -59,11 +59,17 @@ function App() {
   }, [fetchTodos, user]);
 
   //Добавила состояние фильтра
-  type FilterType = 'all' | 'active' | 'completed';
+  type FilterType = 'all' | 'active' | 'completed' | 'overdue';
+  // overdue - просроченные = невыполненные задачи с истёкшим дедлайном.
 
   function getFilterSearchParams(searchParams: URLSearchParams): FilterType {
     const value = searchParams.get('filter');
-    if (value === 'all' || value === 'active' || value === 'completed')
+    if (
+      value === 'all' ||
+      value === 'active' ||
+      value === 'completed' ||
+      value === 'overdue'
+    )
       return value;
     return 'all';
   }
@@ -76,6 +82,18 @@ function App() {
         return todos.filter((t: ITodo) => !t.completed);
       case 'completed':
         return todos.filter((t: ITodo) => t.completed);
+      case 'overdue': {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        return todos.filter((t: ITodo) => {
+          if (t.completed || !t.dueDate) return false;
+          const dueDate = new Date(t.dueDate);
+          dueDate.setHours(0, 0, 0, 0);
+          return today > dueDate;
+        });
+      }
+
       default:
         return todos;
     }
@@ -94,6 +112,14 @@ function App() {
   // счетчики
   const activeCount = todos.filter((todo: ITodo) => !todo.completed).length;
   const doneCount = todos.filter((todo: ITodo) => todo.completed).length;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const overdueCount = todos.filter((t: ITodo) => {
+    if (t.completed || !t.dueDate) return false;
+    const dueDate = new Date(t.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+    return today > dueDate;
+  }).length;
 
   function openModal() {
     setIsModalOpen(true);
@@ -252,17 +278,15 @@ function App() {
   const listPage = (
     <>
       <div className={styles.container}>
-        {user ? <p>Вы вошли как {user.email}</p> : <p>Пока никто не вошел</p>}
-        <Button type="button" onClick={() => handleLogout()}>
-          Выйти
-        </Button>
+        <div className={styles.header}>
+          {user ? <p>Вы вошли как {user.email}</p> : <p>Пока никто не вошел</p>}
+          <Button type="button" onClick={() => handleLogout()}>
+            Выйти
+          </Button>
+        </div>
 
-        <h1 className={styles.title}>Создай удобный список дел</h1>
+        <h1 className={styles.title}>Мои задачи</h1>
 
-        <p className={styles.slogan}>
-          Фиксируй задачи. Помогаем выполнять запланированное без хаоса и лишних
-          усилий.
-        </p>
         {!user?.emailVerified && (
           <p className={styles.verificationNotice}>
             Подтвердите email по ссылке из письма, чтобы завершить регистрацию.
@@ -276,23 +300,6 @@ function App() {
             Моя статистика
           </Link>
         </div>
-
-        {filteredTodos.length === 0 ? (
-          <div className={styles.emptyState}>
-            <h2 className={styles.emptyTitle}>Пока задач нет</h2>
-            <p className={styles.emptyText}>
-              Создай первую задачу и начни планировать.
-            </p>
-          </div>
-        ) : (
-          <TodoList
-            todos={filteredTodos}
-            onRemove={removeTask}
-            onToggle={handleToggleTodo}
-            onEdit={handleEdit}
-            onDetails={handleDetails}
-          />
-        )}
 
         <div className={styles.controls}>
           <button
@@ -316,7 +323,37 @@ function App() {
           >
             Выполненные {doneCount}
           </button>
+          <button
+            className={`${styles.button} ${filter === 'overdue' ? styles.buttonActive : ''}`}
+            aria-pressed={filter === 'overdue'}
+            onClick={() => handleFilterChange('overdue')}
+          >
+            Просроченные {overdueCount}
+          </button>
         </div>
+
+        {todos.length === 0 ? (
+          <div className={styles.emptyState}>
+            <h2 className={styles.emptyTitle}>Пока задач нет</h2>
+            <p className={styles.emptyText}>
+              Создай первую задачу и начни планировать.
+            </p>
+          </div>
+        ) : filteredTodos.length === 0 ? (
+          <div className={styles.emptyState}>
+            <h2 className={styles.emptyTitle}>По этому фильтру задач нет</h2>
+            <p className={styles.emptyText}>Попробуй выбрать другой фильтр.</p>
+          </div>
+        ) : (
+          <TodoList
+            todos={filteredTodos}
+            onRemove={removeTask}
+            onToggle={handleToggleTodo}
+            onEdit={handleEdit}
+            onDetails={handleDetails}
+          />
+        )}
+
         <div className={styles.resetsWrapper}>
           <button
             type="button"
