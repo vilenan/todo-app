@@ -68,6 +68,16 @@ function App() {
     | 'withoutDueDate';
   // overdue - просроченные = невыполненные задачи с истёкшим дедлайном.
 
+  type SortType = 'default' | 'deadline';
+
+  function getSortSearchParams(searchParams: URLSearchParams): SortType {
+    const value = searchParams.get('sort');
+    if (value === 'default' || value === 'deadline') return value;
+    return 'default';
+  }
+
+  const sort: SortType = getSortSearchParams(searchParams);
+
   function getFilterSearchParams(searchParams: URLSearchParams): FilterType {
     const value = searchParams.get('filter');
     if (
@@ -99,12 +109,33 @@ function App() {
     }
   }, [todos, filter]);
 
+  const sortedTodos = useMemo(() => {
+    if (sort === 'default') return filteredTodos;
+    return [...filteredTodos].sort((a, b) => {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    });
+  }, [filteredTodos, sort]);
+
   function handleFilterChange(nextFilter: FilterType) {
     const next = new URLSearchParams(searchParams);
     if (nextFilter === 'all') {
       next.delete('filter');
     } else {
       next.set('filter', nextFilter);
+    }
+    setSearchParams(next);
+  }
+
+  function handleSortChange(nextSort: SortType) {
+    const next = new URLSearchParams(searchParams);
+
+    if (nextSort === 'default') {
+      next.delete('sort');
+    } else {
+      next.set('sort', nextSort);
     }
     setSearchParams(next);
   }
@@ -299,41 +330,55 @@ function App() {
 
         <div className={styles.controls}>
           <button
-            className={`${styles.button} ${filter === 'all' ? styles.buttonActive : ''}`}
+            className={`${styles.filterButton} ${filter === 'all' ? styles.filterButtonActive : ''}`}
             aria-pressed={filter === 'all'}
             onClick={() => handleFilterChange('all')}
           >
             Все {todos.length}
           </button>
           <button
-            className={`${styles.button} ${filter === 'active' ? styles.buttonActive : ''}`}
+            className={`${styles.filterButton} ${filter === 'active' ? styles.filterButtonActive : ''}`}
             aria-pressed={filter === 'active'}
             onClick={() => handleFilterChange('active')}
           >
             Активные {activeCount}
           </button>
           <button
-            className={`${styles.button} ${filter === 'completed' ? styles.buttonActive : ''}`}
+            className={`${styles.filterButton} ${filter === 'completed' ? styles.filterButtonActive : ''}`}
             aria-pressed={filter === 'completed'}
             onClick={() => handleFilterChange('completed')}
           >
             Выполненные {doneCount}
           </button>
           <button
-            className={`${styles.button} ${filter === 'overdue' ? styles.buttonActive : ''}`}
+            className={`${styles.filterButton} ${filter === 'overdue' ? styles.filterButtonActive : ''}`}
             aria-pressed={filter === 'overdue'}
             onClick={() => handleFilterChange('overdue')}
           >
             Просроченные {overdueCount}
           </button>
           <button
-            className={`${styles.button} ${filter === 'withoutDueDate' ? styles.buttonActive : ''}`}
+            className={`${styles.filterButton} ${filter === 'withoutDueDate' ? styles.filterButtonActive : ''}`}
             aria-pressed={filter === 'withoutDueDate'}
             onClick={() => handleFilterChange('withoutDueDate')}
           >
             Без дедлайна {withoutDueDateCount}
           </button>
         </div>
+
+        <label className={styles.sortControl}>
+          Сортировка
+          <select
+            className={styles.sortSelect}
+            value={sort}
+            onChange={(event) =>
+              handleSortChange(event.target.value as SortType)
+            }
+          >
+            <option value="default">по умолчанию</option>
+            <option value="deadline">по сроку</option>
+          </select>
+        </label>
 
         {todos.length === 0 ? (
           <div className={styles.emptyState}>
@@ -349,7 +394,7 @@ function App() {
           </div>
         ) : (
           <TodoList
-            todos={filteredTodos}
+            todos={sortedTodos}
             onRemove={removeTask}
             onToggle={handleToggleTodo}
             onEdit={handleEdit}
