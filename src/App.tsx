@@ -10,6 +10,7 @@ import TodoEditModal from './components/todo-edit-modal/todo-edit-modal';
 import { useTodos } from './store/todoStore';
 import { useEditModal } from './hooks/useEditModal';
 import { useAuthStore } from './store/authStore';
+import { isOverdue } from './lib/todoDate';
 
 function App() {
   const {
@@ -59,7 +60,12 @@ function App() {
   }, [fetchTodos, user]);
 
   //Добавила состояние фильтра
-  type FilterType = 'all' | 'active' | 'completed' | 'overdue';
+  type FilterType =
+    | 'all'
+    | 'active'
+    | 'completed'
+    | 'overdue'
+    | 'withoutDueDate';
   // overdue - просроченные = невыполненные задачи с истёкшим дедлайном.
 
   function getFilterSearchParams(searchParams: URLSearchParams): FilterType {
@@ -68,7 +74,8 @@ function App() {
       value === 'all' ||
       value === 'active' ||
       value === 'completed' ||
-      value === 'overdue'
+      value === 'overdue' ||
+      value === 'withoutDueDate'
     )
       return value;
     return 'all';
@@ -82,17 +89,10 @@ function App() {
         return todos.filter((t: ITodo) => !t.completed);
       case 'completed':
         return todos.filter((t: ITodo) => t.completed);
-      case 'overdue': {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        return todos.filter((t: ITodo) => {
-          if (t.completed || !t.dueDate) return false;
-          const dueDate = new Date(t.dueDate);
-          dueDate.setHours(0, 0, 0, 0);
-          return today > dueDate;
-        });
-      }
+      case 'overdue':
+        return todos.filter((t: ITodo) => !t.completed && isOverdue(t.dueDate));
+      case 'withoutDueDate':
+        return todos.filter((t: ITodo) => !t.dueDate);
 
       default:
         return todos;
@@ -112,14 +112,10 @@ function App() {
   // счетчики
   const activeCount = todos.filter((todo: ITodo) => !todo.completed).length;
   const doneCount = todos.filter((todo: ITodo) => todo.completed).length;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const overdueCount = todos.filter((t: ITodo) => {
-    if (t.completed || !t.dueDate) return false;
-    const dueDate = new Date(t.dueDate);
-    dueDate.setHours(0, 0, 0, 0);
-    return today > dueDate;
-  }).length;
+  const overdueCount = todos.filter(
+    (todo: ITodo) => !todo.completed && isOverdue(todo.dueDate)
+  ).length;
+  const withoutDueDateCount = todos.filter((t: ITodo) => !t.dueDate).length;
 
   function openModal() {
     setIsModalOpen(true);
@@ -329,6 +325,13 @@ function App() {
             onClick={() => handleFilterChange('overdue')}
           >
             Просроченные {overdueCount}
+          </button>
+          <button
+            className={`${styles.button} ${filter === 'withoutDueDate' ? styles.buttonActive : ''}`}
+            aria-pressed={filter === 'withoutDueDate'}
+            onClick={() => handleFilterChange('withoutDueDate')}
+          >
+            Без дедлайна {withoutDueDateCount}
           </button>
         </div>
 
