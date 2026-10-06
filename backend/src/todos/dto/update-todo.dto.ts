@@ -1,4 +1,4 @@
-import { TodoPriority } from '@prisma/client';
+import { TodoCategory, TodoPriority } from '@prisma/client';
 
 export class UpdateTodoDto {
   text?: string;
@@ -6,4 +6,5 @@ export class UpdateTodoDto {
   dueDate?: string | null;
   completed?: boolean;
   priority?: TodoPriority;
+  category?: TodoCategory | null;
 }

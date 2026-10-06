@@ -12,6 +12,12 @@ enum TodoPriority {
   high
 }
 
+enum TodoCategory {
+  home
+  study
+  work
+}
+
 model User {
   id                      String                   @id @default(cuid())
   email                   String                   @unique
@@ -57,6 +63,7 @@ model Todo {
   completed   Boolean      @default(false)
   dueDate     DateTime?
   priority    TodoPriority @default(medium)
+  category    TodoCategory?
 
   userId      String
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)

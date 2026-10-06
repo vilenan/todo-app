@@ -134,3 +134,31 @@
   background: #fee2e2;
   color: #b91c1c;
 }
+
+.categoryHome,
+.categoryStudy,
+.categoryWork {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.categoryHome {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.categoryStudy {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.categoryWork {
+  background: #ffedd5;
+  color: #9a3412;
+}

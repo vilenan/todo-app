@@ -1,4 +1,5 @@
 export type TodoPriority = 'low' | 'medium' | 'high';
+export type TodoCategory = 'home' | 'study' | 'work';
 export interface ITodo {
   id: string;
   text: string;
@@ -6,4 +7,5 @@ export interface ITodo {
   completed: boolean;
   dueDate?: string;
   priority: TodoPriority;
+  category: TodoCategory | null;
 }

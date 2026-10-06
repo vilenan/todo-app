@@ -4,7 +4,7 @@ import styles from './App.module.css';
 import Button from './components/button/button';
 import TodoForm from './components/todo-form/todo-form';
 import TodoList from './components/to-do-list/to-do-list';
-import type { ITodo, TodoPriority } from './types/ITodo';
+import type { ITodo, TodoPriority, TodoCategory } from './types/ITodo';
 import { Modal } from './components/modal/modal';
 import TodoEditModal from './components/todo-edit-modal/todo-edit-modal';
 import { useTodos } from './store/todoStore';
@@ -29,11 +29,13 @@ function App() {
     description: editDescription,
     dueDate: editDueDate,
     priority: editPriority,
+    category: editCategory,
     error: editError,
     isSubmitDisabled: isEditSubmitDisabled,
     setDescription: setEditDescription,
     setDueDate: setEditDueDate,
     setPriority: setEditPriority,
+    setCategory: setEditCategory,
     open: openEditModal,
     close: closeEditModal,
     onTextChange: onEditTextChange,
@@ -44,6 +46,7 @@ function App() {
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [category, setCategory] = useState<TodoCategory | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -153,6 +156,7 @@ function App() {
     setText('');
     setDescription('');
     setPriority('medium');
+    setCategory(null);
     setDueDate('');
     setTouched(false);
     setError(null);
@@ -163,6 +167,7 @@ function App() {
     setText('');
     setDescription('');
     setPriority('medium');
+    setCategory(null);
     setDueDate('');
     setTouched(false);
     setError(null);
@@ -220,7 +225,8 @@ function App() {
     text: string,
     descriptionValue: string,
     dateValue: string,
-    priority: TodoPriority
+    priority: TodoPriority,
+    category: TodoCategory | null
   ) {
     if (!user) return;
     const trimmed = text.trim();
@@ -229,6 +235,7 @@ function App() {
       text: trimmed,
       description: trimmedDescription ? trimmedDescription : undefined,
       priority: priority || 'medium',
+      category: category ?? undefined,
       dueDate: dateValue || undefined,
     });
   }
@@ -269,7 +276,7 @@ function App() {
     setTouched(true);
     setError(nextError);
     if (nextError) return;
-    await addTodos(text, description, dueDate, priority);
+    await addTodos(text, description, dueDate, priority, category);
     closeModal();
   }
 
@@ -428,12 +435,14 @@ function App() {
               description={description}
               dueDate={dueDate}
               priority={priority}
+              category={category}
               error={error}
               isSubmitDisabled={isSubmitDisabled}
               submitLabel="Добавить"
               onSubmit={handleSubmit}
               onCancel={closeModal}
               onPriorityChange={setPriority}
+              onCategoryChange={setCategory}
               onTextChange={handleTextChange}
               onTextBlur={handleTextBlur}
               onDescriptionChange={setDescription}
@@ -448,6 +457,7 @@ function App() {
           description={editDescription}
           dueDate={editDueDate}
           priority={editPriority}
+          category={editCategory}
           error={editError}
           isSubmitDisabled={isEditSubmitDisabled}
           onSubmit={(e) => {
@@ -465,6 +475,7 @@ function App() {
           onTextBlur={onEditTextBlur}
           onDescriptionChange={setEditDescription}
           onPriorityChange={setEditPriority}
+          onCategoryChange={setEditCategory}
           onDueDateChange={setEditDueDate}
           inputRef={editInputRef}
         />

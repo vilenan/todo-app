@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import type { TodoPriority } from '../../types/ITodo';
+import type { TodoPriority, TodoCategory } from '../../types/ITodo';
 import styles from './todo-form.module.css';
 import Button from '../button/button';
 
@@ -8,6 +8,7 @@ interface TodoFormProps {
   description: string;
   dueDate: string;
   priority: TodoPriority;
+  category: TodoCategory | null;
   error: string | null;
   isSubmitDisabled: boolean;
   submitLabel: string;
@@ -18,14 +19,15 @@ interface TodoFormProps {
   onDescriptionChange: (value: string) => void;
   onDueDateChange: (value: string) => void;
   onPriorityChange: (value: TodoPriority) => void;
+  onCategoryChange: (value: TodoCategory | null) => void;
   inputRef: RefObject<HTMLInputElement | null>;
 }
-
 function TodoForm({
   text,
   description,
   dueDate,
   priority,
+  category,
   error,
   isSubmitDisabled,
   submitLabel,
@@ -36,6 +38,7 @@ function TodoForm({
   onDescriptionChange,
   onDueDateChange,
   onPriorityChange,
+  onCategoryChange,
   inputRef,
 }: TodoFormProps) {
   return (
@@ -74,6 +77,23 @@ function TodoForm({
           <option value="low">Низкий</option>
           <option value="medium">Средний</option>
           <option value="high">Высокий</option>
+        </select>
+      </label>
+
+      <label className={styles.label}>
+        Категория
+        <select
+          value={category ?? ''}
+          onChange={(e) =>
+            onCategoryChange(
+              e.target.value === '' ? null : (e.target.value as TodoCategory)
+            )
+          }
+        >
+          <option value="">без категории</option>
+          <option value="home">дом</option>
+          <option value="study">учеба</option>
+          <option value="work">работа</option>
         </select>
       </label>
 

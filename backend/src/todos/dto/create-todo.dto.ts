@@ -1,8 +1,9 @@
-import { TodoPriority } from '@prisma/client';
+import { TodoCategory, TodoPriority } from '@prisma/client';
 
 export class CreateTodoDto {
   text!: string;
   description?: string;
   dueDate?: string;
   priority?: TodoPriority;
+  category?: TodoCategory;
 }

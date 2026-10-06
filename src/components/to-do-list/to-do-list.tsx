@@ -27,6 +27,7 @@ function TodoList({
             description={item.description}
             dueDate={item.dueDate}
             priority={item.priority}
+            category={item.category}
             completed={item.completed}
             onRemove={onRemove}
             onToggle={onToggle}

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { API_URL } from '../config/api';
-import type { ITodo, TodoPriority } from '../types/ITodo';
+import type { ITodo, TodoPriority, TodoCategory } from '../types/ITodo';
 import { useAuthStore } from './authStore';
 
 export type AddTodoPayload = {
@@ -8,6 +8,7 @@ export type AddTodoPayload = {
   description?: string;
   dueDate?: string;
   priority?: TodoPriority;
+  category?: TodoCategory;
 };
 
 export type UpdateTodoPayload = {
@@ -16,6 +17,7 @@ export type UpdateTodoPayload = {
   description?: string;
   dueDate?: string;
   priority?: TodoPriority;
+  category?: TodoCategory | null;
 };
 
 type TodosStore = {
@@ -86,7 +88,7 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     set({ todos });
   },
 
-  addTodo: async ({ text, description, dueDate, priority }) => {
+  addTodo: async ({ text, description, dueDate, priority, category }) => {
     const response = await fetchWithRefresh(`${API_URL}/todos`, {
       method: 'POST',
       body: JSON.stringify({
@@ -94,6 +96,7 @@ export const useTodos = create<TodosStore>()((set, get) => ({
         description,
         dueDate,
         priority,
+        category,
       }),
     });
 
@@ -108,7 +111,14 @@ export const useTodos = create<TodosStore>()((set, get) => ({
     }));
   },
 
-  updateTodo: async ({ id, text, description, dueDate, priority }) => {
+  updateTodo: async ({
+    id,
+    text,
+    description,
+    dueDate,
+    priority,
+    category,
+  }) => {
     const response = await fetchWithRefresh(`${API_URL}/todos/${id}`, {
       method: 'PATCH',
       body: JSON.stringify({
@@ -116,6 +126,7 @@ export const useTodos = create<TodosStore>()((set, get) => ({
         description,
         dueDate,
         priority,
+        category,
       }),
     });
 

@@ -34,6 +34,7 @@ export class TodosService {
         description: dto.description,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
         priority: dto.priority ?? 'medium',
+        category: dto.category,
       },
     });
   }
@@ -54,6 +55,7 @@ export class TodosService {
               ? null
               : new Date(dto.dueDate),
         priority: dto.priority,
+        category: dto.category,
       },
     });
   }

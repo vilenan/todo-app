@@ -4,6 +4,7 @@ import { formatDate } from '../../lib/formatDate';
 
 import type { ITodoItem } from '../../types/ITodoItem';
 import { getPriorityLabel, getPriorityClass } from '../../lib/todoPriority';
+import { getCategoryClass } from '../../lib/todoCategory';
 
 export function TodoItem({
   text,
@@ -11,6 +12,7 @@ export function TodoItem({
   id,
   completed,
   priority,
+  category,
   onRemove,
   onToggle,
   onEdit,
@@ -40,6 +42,11 @@ export function TodoItem({
           >
             Приоритет {getPriorityLabel(priority)}
           </span>
+          {category && (
+            <span className={`${styles[getCategoryClass(category)]}`}>
+              #{category}
+            </span>
+          )}
         </div>
       </div>
       <Button
@@ -53,8 +60,22 @@ export function TodoItem({
         onClick={() => {
           onEdit(id);
         }}
+        ariaLabel="Редактировать задачу"
       >
-        Редактировать
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
       </Button>
       <Button
         onClick={() => {

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import type React from 'react';
 import { useTodos } from '../store/todoStore';
-import type { ITodo, TodoPriority } from '../types/ITodo';
+import type { ITodo, TodoPriority, TodoCategory } from '../types/ITodo';
 
 function validateText(value: string) {
   const trimmed = value.trim();
@@ -20,6 +20,7 @@ export function useEditModal() {
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<TodoPriority>('medium');
+  const [category, setCategory] = useState<TodoCategory | null>(null);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,6 +36,7 @@ export function useEditModal() {
       setDescription(todo.description ?? '');
       setDueDate(todo.dueDate ?? '');
       setPriority(todo.priority ?? 'medium');
+      setCategory(todo.category);
       setTouched(false);
       setError(null);
       setIsOpen(true);
@@ -50,6 +52,7 @@ export function useEditModal() {
     setDescription('');
     setDueDate('');
     setPriority('medium');
+    setCategory(null);
     setTouched(false);
     setError(null);
   }, []);
@@ -87,11 +90,12 @@ export function useEditModal() {
         description: trimmedDescription ? trimmedDescription : undefined,
         dueDate: dueDate || undefined,
         priority,
+        category,
       });
 
       return true;
     },
-    [description, dueDate, editingId, priority, text, updateTodo]
+    [description, dueDate, editingId, priority, category, text, updateTodo]
   );
 
   return {
@@ -101,12 +105,14 @@ export function useEditModal() {
     description,
     dueDate,
     priority,
+    category,
     touched,
     error,
     isSubmitDisabled,
     setDescription,
     setDueDate,
     setPriority,
+    setCategory,
     open,
     close,
     onTextChange,

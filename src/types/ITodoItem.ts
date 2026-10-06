@@ -1,4 +1,4 @@
-import type { TodoPriority } from './ITodo';
+import type { TodoCategory, TodoPriority } from './ITodo';
 export interface ITodoItem {
   text: string;
   description?: string;
@@ -6,6 +6,7 @@ export interface ITodoItem {
   id: string;
   completed: boolean;
   priority: TodoPriority;
+  category: TodoCategory | null;
   onRemove: (id: string) => void;
   onToggle: (id: string) => void;
   onEdit: (id: string) => void;
