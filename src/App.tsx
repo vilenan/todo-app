@@ -73,6 +73,25 @@ function App() {
 
   type SortType = 'default' | 'deadline';
 
+  type CategoryFilter = 'all' | 'home' | 'study' | 'work' | 'uncategorized';
+
+  function getCategorySearchParams(
+    searchParams: URLSearchParams
+  ): CategoryFilter {
+    const value = searchParams.get('category');
+    if (
+      value === 'all' ||
+      value === 'home' ||
+      value === 'study' ||
+      value === 'work' ||
+      value === 'uncategorized'
+    )
+      return value;
+    return 'all';
+  }
+
+  const categoryFilter: CategoryFilter = getCategorySearchParams(searchParams);
+
   function getSortSearchParams(searchParams: URLSearchParams): SortType {
     const value = searchParams.get('sort');
     if (value === 'default' || value === 'deadline') return value;
@@ -94,23 +113,39 @@ function App() {
     return 'all';
   }
 
+  const categoryFilteredTodos = useMemo(() => {
+    switch (categoryFilter) {
+      case 'home':
+      case 'study':
+      case 'work':
+        return todos.filter((todo) => todo.category === categoryFilter);
+
+      case 'uncategorized':
+        return todos.filter((todo) => todo.category === null);
+      default:
+        return todos;
+    }
+  }, [todos, categoryFilter]);
+
   const filter: FilterType = getFilterSearchParams(searchParams);
 
   const filteredTodos = useMemo(() => {
     switch (filter) {
       case 'active':
-        return todos.filter((t: ITodo) => !t.completed);
+        return categoryFilteredTodos.filter((t: ITodo) => !t.completed);
       case 'completed':
-        return todos.filter((t: ITodo) => t.completed);
+        return categoryFilteredTodos.filter((t: ITodo) => t.completed);
       case 'overdue':
-        return todos.filter((t: ITodo) => !t.completed && isOverdue(t.dueDate));
+        return categoryFilteredTodos.filter(
+          (t: ITodo) => !t.completed && isOverdue(t.dueDate)
+        );
       case 'withoutDueDate':
-        return todos.filter((t: ITodo) => !t.dueDate);
+        return categoryFilteredTodos.filter((t: ITodo) => !t.dueDate);
 
       default:
-        return todos;
+        return categoryFilteredTodos;
     }
-  }, [todos, filter]);
+  }, [categoryFilteredTodos, filter]);
 
   const sortedTodos = useMemo(() => {
     if (sort === 'default') return filteredTodos;
@@ -129,6 +164,18 @@ function App() {
     } else {
       next.set('filter', nextFilter);
     }
+    setSearchParams(next);
+  }
+
+  function handleCategoryFilterChange(nextCategory: CategoryFilter) {
+    const next = new URLSearchParams(searchParams);
+
+    if (nextCategory === 'all') {
+      next.delete('category');
+    } else {
+      next.set('category', nextCategory);
+    }
+
     setSearchParams(next);
   }
 
@@ -372,20 +419,38 @@ function App() {
             Без дедлайна {withoutDueDateCount}
           </button>
         </div>
+        <div className={styles.listControls}>
+          <label className={styles.listControl}>
+            Категория
+            <select
+              className={styles.listSelect}
+              value={categoryFilter}
+              onChange={(event) =>
+                handleCategoryFilterChange(event.target.value as CategoryFilter)
+              }
+            >
+              <option value="all">Все категории</option>
+              <option value="home">Дом</option>
+              <option value="study">Учёба</option>
+              <option value="work">Работа</option>
+              <option value="uncategorized">Без категории</option>
+            </select>
+          </label>
 
-        <label className={styles.sortControl}>
-          Сортировка
-          <select
-            className={styles.sortSelect}
-            value={sort}
-            onChange={(event) =>
-              handleSortChange(event.target.value as SortType)
-            }
-          >
-            <option value="default">по умолчанию</option>
-            <option value="deadline">по сроку</option>
-          </select>
-        </label>
+          <label className={styles.listControl}>
+            Сортировка
+            <select
+              className={styles.listSelect}
+              value={sort}
+              onChange={(event) =>
+                handleSortChange(event.target.value as SortType)
+              }
+            >
+              <option value="default">по умолчанию</option>
+              <option value="deadline">по сроку</option>
+            </select>
+          </label>
+        </div>
 
         {todos.length === 0 ? (
           <div className={styles.emptyState}>

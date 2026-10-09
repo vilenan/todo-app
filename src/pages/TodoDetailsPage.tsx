@@ -10,6 +10,7 @@ import styles from './TodoDetailsPage.module.css';
 import { useTodos } from '../store/todoStore';
 import { useEditModal } from '../hooks/useEditModal';
 import TodoEditModal from '../components/todo-edit-modal/todo-edit-modal';
+import { getCategoryClass } from '../lib/todoCategory';
 
 function getDeadlineStatus(dueDate?: string) {
   if (!dueDate) {
@@ -151,27 +152,36 @@ export function Component() {
             {todo.completed ? 'Выполнена' : 'Активна'}
           </span>
         </div>
-
         <div className={styles.row}>
           <h2 className={styles.label}>Текст задачи</h2>
           <p className={styles.value}>{todo.text}</p>
         </div>
-
         <div className={styles.row}>
           <h2 className={styles.label}>Описание задачи</h2>
           <p className={styles.value}>{todo.description || 'Нет описания'}</p>
         </div>
-
         <div className={styles.row}>
           <h2 className={styles.label}>Срок выполнения</h2>
           <p className={styles.value}>{todo.dueDate || 'Не указан'}</p>
         </div>
-
         <div className={styles.row}>
           <h2 className={styles.label}>Дедлайн-статус</h2>
           <p className={`${styles.value} ${styles[deadlineStatus.tone]}`}>
             {deadlineStatus.label}
           </p>
+        </div>
+
+        <div className={styles.row}>
+          <h2 className={styles.label}>Категория</h2>
+          {todo.category ? (
+            <span
+              className={`${styles.categoryBadge} ${styles[getCategoryClass(todo.category)]}`}
+            >
+              #{todo.category}
+            </span>
+          ) : (
+            <p className={styles.value}>без категории</p>
+          )}
         </div>
       </div>
 
