@@ -48,6 +48,7 @@ function App() {
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [category, setCategory] = useState<TodoCategory | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -352,34 +353,93 @@ function App() {
     clearCompleted();
   }
 
-  function handleLogout() {
-    logout();
-  }
-
   const listPage = (
     <>
       <div className={styles.container}>
         <div className={styles.header}>
-          {user ? <p>Вы вошли как {user.email}</p> : <p>Пока никто не вошел</p>}
-          <Button type="button" onClick={() => handleLogout()}>
-            Выйти
-          </Button>
+          {user ? (
+            <>
+              <button
+                type="button"
+                className={styles.avatarButton}
+                aria-label="Открыть меню профиля"
+                aria-expanded={isProfileMenuOpen}
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              >
+                {user.email.charAt(0).toUpperCase()}
+              </button>
+
+              {isProfileMenuOpen && (
+                <div className={styles.profileDropdown}>
+                  <p className={styles.profileEmail}>{user?.email}</p>
+                  <div className={styles.menuDivider} />
+                  <Link
+                    className={styles.menuItem}
+                    to="/profile"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <svg
+                      className={styles.menuIcon}
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path d="M20 21a8 8 0 0 0-16 0" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span>Профиль</span>
+                  </Link>
+                  <Link
+                    className={styles.menuItem}
+                    to="/stats"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <svg
+                      className={styles.menuIcon}
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 19V10" />
+                      <path d="M10 19V4" />
+                      <path d="M16 19v-7" />
+                      <path d="M22 19H2" />
+                    </svg>
+                    <span>Моя статистика</span>
+                  </Link>
+                  <div className={styles.menuDivider} />
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    onClick={() => {
+                      setIsProfileMenuOpen(false);
+                      logout();
+                    }}
+                  >
+                    <svg
+                      className={styles.menuIcon}
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path d="M10 17l5-5-5-5" />
+                      <path d="M15 12H3" />
+                      <path d="M21 3v18" />
+                    </svg>
+                    <span>Выйти</span>
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <p>пока никто не вошел</p>
+          )}
         </div>
 
-        <h1 className={styles.title}>Мои задачи</h1>
-
-        {!user?.emailVerified && (
-          <p className={styles.verificationNotice}>
-            Подтвердите email по ссылке из письма, чтобы завершить регистрацию.
-          </p>
-        )}
-        <div className={styles.topActions}>
-          <Button type="button" onClick={openModal}>
-            + Добавить задачу
-          </Button>
-          <Link className={styles.statsLink} to="/stats">
-            Моя статистика
-          </Link>
+        <div className={styles.pageTop}>
+          <h1 className={styles.title}>Мои задачи</h1>
+          <div className={styles.topActions}>
+            <Button type="button" onClick={openModal}>
+              + Добавить задачу
+            </Button>
+          </div>
         </div>
 
         <div className={styles.controls}>

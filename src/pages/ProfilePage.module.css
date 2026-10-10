@@ -1,0 +1,33 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.backLink {
+  color: #4f46e5;
+}
+
+.title {
+  margin: 24px 0;
+}
+
+.info {
+  margin: 12px 0;
+}
+
+.info span {
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.statsLink {
+  color: #4f46e5;
+  font-weight: 600;
+}

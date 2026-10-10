@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import StatisticPage from './pages/StatisticPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import ProfilePage from './pages/ProfilePage';
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
     path: '/verify-email',
     element: <VerifyEmailPage />,
   },
+
   {
     path: '/',
     element: <AppLayout />,
@@ -27,6 +29,7 @@ export const router = createBrowserRouter([
         index: true,
         element: <App />,
       },
+      { path: 'profile', element: <ProfilePage /> },
       {
         path: 'stats',
         element: <StatisticPage />,
