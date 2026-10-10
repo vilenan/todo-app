@@ -53,6 +53,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const editInputRef = useRef<HTMLInputElement | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -62,6 +63,36 @@ function App() {
     if (!user) return;
     void fetchTodos();
   }, [fetchTodos, user]);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsProfileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isProfileMenuOpen]);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+    function handleMouseDown(event: MouseEvent) {
+      const clickedElement = event.target;
+      if (
+        profileMenuRef.current &&
+        clickedElement instanceof Node &&
+        !profileMenuRef.current.contains(clickedElement)
+      )
+        setIsProfileMenuOpen(false);
+    }
+
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, [isProfileMenuOpen]);
 
   //Добавила состояние фильтра
   type FilterType =
@@ -356,7 +387,7 @@ function App() {
   const listPage = (
     <>
       <div className={styles.container}>
-        <div className={styles.header}>
+        <div className={styles.header} ref={profileMenuRef}>
           {user ? (
             <>
               <button
