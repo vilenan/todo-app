@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './App.module.css';
 import Button from './components/button/button';
 import TodoForm from './components/todo-form/todo-form';
@@ -11,6 +11,7 @@ import { useTodos } from './store/todoStore';
 import { useEditModal } from './hooks/useEditModal';
 import { useAuthStore } from './store/authStore';
 import { isOverdue } from './lib/todoDate';
+import ProfileMenu from './pages/ProfileMenu';
 
 function App() {
   const {
@@ -48,12 +49,10 @@ function App() {
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [category, setCategory] = useState<TodoCategory | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const editInputRef = useRef<HTMLInputElement | null>(null);
-  const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -63,36 +62,6 @@ function App() {
     if (!user) return;
     void fetchTodos();
   }, [fetchTodos, user]);
-
-  useEffect(() => {
-    if (!isProfileMenuOpen) return;
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setIsProfileMenuOpen(false);
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isProfileMenuOpen]);
-
-  useEffect(() => {
-    if (!isProfileMenuOpen) return;
-    function handleMouseDown(event: MouseEvent) {
-      const clickedElement = event.target;
-      if (
-        profileMenuRef.current &&
-        clickedElement instanceof Node &&
-        !profileMenuRef.current.contains(clickedElement)
-      )
-        setIsProfileMenuOpen(false);
-    }
-
-    document.addEventListener('mousedown', handleMouseDown);
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown);
-    };
-  }, [isProfileMenuOpen]);
 
   //Добавила состояние фильтра
   type FilterType =
@@ -387,78 +356,9 @@ function App() {
   const listPage = (
     <>
       <div className={styles.container}>
-        <div className={styles.header} ref={profileMenuRef}>
+        <div className={styles.header}>
           {user ? (
-            <>
-              <button
-                type="button"
-                className={styles.avatarButton}
-                aria-label="Открыть меню профиля"
-                aria-expanded={isProfileMenuOpen}
-                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              >
-                {user.email.charAt(0).toUpperCase()}
-              </button>
-
-              {isProfileMenuOpen && (
-                <div className={styles.profileDropdown}>
-                  <p className={styles.profileEmail}>{user?.email}</p>
-                  <div className={styles.menuDivider} />
-                  <Link
-                    className={styles.menuItem}
-                    to="/profile"
-                    onClick={() => setIsProfileMenuOpen(false)}
-                  >
-                    <svg
-                      className={styles.menuIcon}
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 21a8 8 0 0 0-16 0" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    <span>Профиль</span>
-                  </Link>
-                  <Link
-                    className={styles.menuItem}
-                    to="/stats"
-                    onClick={() => setIsProfileMenuOpen(false)}
-                  >
-                    <svg
-                      className={styles.menuIcon}
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path d="M4 19V10" />
-                      <path d="M10 19V4" />
-                      <path d="M16 19v-7" />
-                      <path d="M22 19H2" />
-                    </svg>
-                    <span>Моя статистика</span>
-                  </Link>
-                  <div className={styles.menuDivider} />
-                  <button
-                    type="button"
-                    className={styles.menuItem}
-                    onClick={() => {
-                      setIsProfileMenuOpen(false);
-                      logout();
-                    }}
-                  >
-                    <svg
-                      className={styles.menuIcon}
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path d="M10 17l5-5-5-5" />
-                      <path d="M15 12H3" />
-                      <path d="M21 3v18" />
-                    </svg>
-                    <span>Выйти</span>
-                  </button>
-                </div>
-              )}
-            </>
+            <ProfileMenu email={user.email} onLogout={logout} />
           ) : (
             <p>пока никто не вошел</p>
           )}

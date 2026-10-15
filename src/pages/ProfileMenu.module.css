@@ -1,0 +1,90 @@
+.profileMenu {
+  position: relative;
+}
+
+.avatarButton {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #4f46e5;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.avatarButton:hover {
+  background: #4338ca;
+}
+
+.avatarButton:focus-visible {
+  outline: 3px solid #a5b4fc;
+  outline-offset: 3px;
+}
+
+.profileDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  min-width: 220px;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
+}
+
+.profileEmail {
+  margin: 0;
+  padding: 10px 12px;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.menuDivider {
+  height: 1px;
+  margin: 6px 0;
+  background: #e5e7eb;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f2937;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menuIcon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.menuItem:hover {
+  background: #eef2ff;
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
