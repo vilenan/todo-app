@@ -114,6 +114,11 @@ function App() {
     return 'all';
   }
 
+  function getFinderSearchParams(searchParams: URLSearchParams): string {
+    const value = searchParams.get('q');
+    return value ? value : '';
+  }
+
   const categoryFilteredTodos = useMemo(() => {
     switch (categoryFilter) {
       case 'home':
@@ -129,6 +134,8 @@ function App() {
   }, [todos, categoryFilter]);
 
   const filter: FilterType = getFilterSearchParams(searchParams);
+
+  const query: string = getFinderSearchParams(searchParams);
 
   const filteredTodos = useMemo(() => {
     switch (filter) {
@@ -148,15 +155,28 @@ function App() {
     }
   }, [categoryFilteredTodos, filter]);
 
+  const searchedTodos = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    if (normalizedQuery === '') {
+      return filteredTodos;
+    }
+
+    return filteredTodos.filter((todo) => {
+      const normalizedText = todo.text.trim().toLowerCase();
+      return normalizedText.includes(normalizedQuery);
+    });
+  }, [filteredTodos, query]);
+
   const sortedTodos = useMemo(() => {
-    if (sort === 'default') return filteredTodos;
-    return [...filteredTodos].sort((a, b) => {
+    if (sort === 'default') return searchedTodos;
+    return [...searchedTodos].sort((a, b) => {
       if (!a.dueDate && !b.dueDate) return 0;
       if (!a.dueDate) return 1;
       if (!b.dueDate) return -1;
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     });
-  }, [filteredTodos, sort]);
+  }, [searchedTodos, sort]);
 
   function handleFilterChange(nextFilter: FilterType) {
     const next = new URLSearchParams(searchParams);
@@ -166,6 +186,16 @@ function App() {
       next.set('filter', nextFilter);
     }
     setSearchParams(next);
+  }
+
+  function handleSearchChange(search: string) {
+    const next = new URLSearchParams(searchParams);
+    if (search === '') {
+      next.delete('q');
+    } else {
+      next.set('q', search);
+    }
+    setSearchParams(next, { replace: true });
   }
 
   function handleCategoryFilterChange(nextCategory: CategoryFilter) {
@@ -371,6 +401,26 @@ function App() {
               + Добавить задачу
             </Button>
           </div>
+        </div>
+        <div className={styles.search}>
+          <label className={styles.srOnly} htmlFor="search">
+            Поиск задач
+          </label>
+          <svg
+            className={styles.searchIcon}
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path d="m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
+          </svg>
+          <input
+            id="search"
+            type="search"
+            placeholder="Поиск задач"
+            value={query}
+            onChange={(event) => handleSearchChange(event.currentTarget.value)}
+          />
         </div>
 
         <div className={styles.controls}>
