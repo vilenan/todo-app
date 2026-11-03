@@ -10,6 +10,7 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { getDeploymentConfig } from '../config/deployment';
 
 @Controller('auth')
 export class AuthController {
@@ -69,7 +70,7 @@ export class AuthController {
     response.cookie(this.refreshCookieName, authResponse.refreshToken, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
+      secure: getDeploymentConfig(process.env).secureCookie,
       maxAge: authResponse.refreshTokenExpiresAt.getTime() - Date.now(),
       path: '/auth',
     });

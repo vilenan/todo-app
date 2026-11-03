@@ -20,7 +20,7 @@ export default function ProfilePage() {
 
       <p className={styles.info}>
         <span>Статус:</span>{' '}
-        {user?.emailVerified ? 'Email подтверждён' : 'Ожидает подтверждения'}
+        {user?.emailVerified ? 'Email подтверждён' : 'Email не подтверждён'}
       </p>
 
       <div className={styles.actions}>

@@ -46,11 +46,15 @@ export class AuthService {
     });
 
     try {
-      const verificationToken = await this.createVerificationToken(user.id);
-      await this.emailService.sendVerificationEmail(
-        user.email,
-        verificationToken,
-      );
+      if (
+        this.configService.get<string>('EMAIL_VERIFICATION_ENABLED') !== 'false'
+      ) {
+        const verificationToken = await this.createVerificationToken(user.id);
+        await this.emailService.sendVerificationEmail(
+          user.email,
+          verificationToken,
+        );
+      }
 
       return this.createAuthResponse(user);
     } catch (error) {

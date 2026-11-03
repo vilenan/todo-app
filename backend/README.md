@@ -6,7 +6,7 @@ NestJS backend для приложения управления задачами
 
 - NestJS 11
 - Prisma 7
-- SQLite
+- SQLite для локальной разработки; PostgreSQL для размещения
 - JWT auth with access/refresh tokens
 - bcrypt
 
@@ -16,7 +16,7 @@ NestJS backend для приложения управления задачами
 - backend: `backend/`
 
 По умолчанию backend запускается на `http://localhost:3000` и разрешает CORS
-для `http://localhost:5173`.
+для `http://localhost:5173`; `FRONTEND_URL` и `PORT` настраивают origin и порт.
 
 ## Установка и запуск
 

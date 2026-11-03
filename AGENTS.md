@@ -15,9 +15,9 @@ the code that currently exists and the checks required before changing it.
 - Frontend talks to the NestJS API at `http://localhost:3000`
 - Authentication uses short-lived access JWTs in frontend memory and refresh
   tokens in `HttpOnly` cookies; tokens are not stored in `localStorage`
-- Email verification links are sent through Resend; an unverified user may still
-  work with tasks and sees a notice in the interface
-- The backend uses SQLite (`backend/dev.db`) through Prisma
+- Email verification links are sent through Resend by default; the demo can disable
+  email verification via `EMAIL_VERIFICATION_ENABLED=false`
+- The backend uses SQLite (`backend/dev.db`) locally or PostgreSQL through Prisma
 
 ## Architecture Notes
 
@@ -42,7 +42,7 @@ the code that currently exists and the checks required before changing it.
 - Backend directory: `backend/`
 - Backend dev URL: `http://localhost:3000`
 - Frontend env var for backend URL: `VITE_API_URL`
-- Allowed frontend origin configured in backend: `http://localhost:5173`
+- Allowed frontend origin configured by `FRONTEND_URL` (local default: `http://localhost:5173`)
 - Auth endpoints used by frontend:
   - `POST /auth/signup`
   - `POST /auth/login`

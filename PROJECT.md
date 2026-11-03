@@ -7,8 +7,8 @@
 - React 19.2, TypeScript 5.9, Vite 7
 - React Router 7 для маршрутизации
 - Zustand 5 для состояния авторизации и задач
-- NestJS backend в соседнем проекте `../todo-backend`
-- Prisma + SQLite на backend
+- NestJS backend в папке монорепозитория `backend/`
+- Prisma + SQLite локально или PostgreSQL на backend
 - CSS Modules для стилей компонентов и страниц
 - ESLint 9, Prettier 3, Husky и lint-staged
 
@@ -19,12 +19,11 @@ npm install
 npm run dev
 ```
 
-Перед запуском frontend поднимите backend в соседней папке:
+Перед запуском frontend поднимите backend из корня монорепозитория:
 
 ```bash
-cd /Users/vilenan/Desktop/React/todo-backend
-npm install
-npm run start:dev
+npm run install:all
+npm run dev:backend
 ```
 
 Frontend ожидает API по адресу `http://localhost:3000`.
@@ -117,7 +116,7 @@ src/
 ## Как данные доходят до интерфейса
 
 ```text
-NestJS API (todo-backend)
+NestJS API (backend/)
   -> src/store/authStore.ts / src/store/todoStore.ts
     -> src/App.tsx, src/pages/*
       -> src/components/*
@@ -130,7 +129,7 @@ NestJS API (todo-backend)
 
 Главный экран живёт в `src/App.tsx`. Он:
 
-- загружает задачи текущего пользователя через `fetchTodos(user.id)`
+- загружает задачи текущего пользователя через `fetchTodos()`
 - хранит состояние модалки создания задачи
 - фильтрует задачи по `filter=all | active | completed`
 - открывает редактирование через `edit=<todoId>`
@@ -148,8 +147,7 @@ NestJS API (todo-backend)
 
 ## Backend API
 
-Frontend использует NestJS backend из соседнего проекта
-`/Users/vilenan/Desktop/React/todo-backend`.
+Frontend использует NestJS backend из папки `backend/` этого репозитория.
 
 Для конфигурации frontend добавьте `.env` на основе `.env.example`.
 

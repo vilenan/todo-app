@@ -6,7 +6,7 @@ NestJS/Prisma backend находятся в одном проекте.
 ## Структура
 
 - `src/` — frontend на React, TypeScript, Vite и Zustand
-- `backend/` — backend на NestJS, Prisma и SQLite
+- `backend/` — backend на NestJS и Prisma (SQLite локально, PostgreSQL для размещения)
 
 Сервисы запускаются на `http://localhost:5173` и `http://localhost:3000`.
 Frontend получает URL API из `VITE_API_URL` (по умолчанию —
@@ -68,8 +68,10 @@ npm run dev
 
 При logout refresh-сессия отзывается в базе, а cookie очищается.
 
-После регистрации приложение отправляет одноразовую ссылку подтверждения на
-указанный email. Пользователь может работать с задачами до подтверждения, но
+По умолчанию после регистрации приложение отправляет одноразовую ссылку подтверждения на
+указанный email. Для демонстрации без почтового сервиса можно установить
+`EMAIL_VERIFICATION_ENABLED=false` в настройках backend: письма не отправляются,
+а адреса остаются неподтверждёнными. Пользователь может работать с задачами до подтверждения, но
 видит соответствующее уведомление. Для локальной отправки добавьте в
 `backend/.env` значения `RESEND_API_KEY`, `RESEND_FROM` и `FRONTEND_URL` из
 `backend/.env.example`.
@@ -92,3 +94,21 @@ npm run dev
 В тестовом режиме используйте email, привязанный к аккаунту Resend. Перед
 отправкой писем реальным пользователям подтвердите собственный домен в Resend
 и замените `RESEND_FROM` на адрес этого домена.
+
+## Подготовка к размещению
+
+Backend поддерживает SQLite и PostgreSQL. Prisma выбирает схему и историю
+миграций по `DATABASE_URL`: `file:` для SQLite, `postgresql:` или `postgres:`
+для PostgreSQL. Для PostgreSQL перед запуском нужно создать пустую базу и из
+папки `backend/` выполнить `npx prisma migrate deploy`, затем `npm run build`.
+Переменная `DATABASE_URL` должна быть доступна как при сборке, так и при запуске:
+при смене базы нужно заново сгенерировать Prisma Client (`npm run prisma:generate`).
+Истории миграций находятся в `backend/prisma/migrations` и
+`backend/prisma/postgresql/migrations`; изменения моделей нужно отражать в обеих схемах.
+
+Для HTTPS укажите `NODE_ENV=production`, `FRONTEND_URL` с адресом интерфейса,
+надёжный `JWT_SECRET`, а `VITE_API_URL` задайте при сборке frontend. Backend
+принимает порт из `PORT`. Frontend и API должны располагаться на одном сайте
+(например, на поддоменах одного домена), чтобы работала refresh cookie
+`SameSite=Lax`; доступ по HTTPS обязателен. Для React Router на хостинге нужен
+SPA fallback на `index.html`. Эти настройки ещё необходимо проверить в ONREZA.
