@@ -8,6 +8,7 @@ import { getCategoryClass } from '../../lib/todoCategory';
 
 export function TodoItem({
   text,
+  description,
   dueDate,
   id,
   completed,
@@ -35,6 +36,7 @@ export function TodoItem({
         <span className={`${styles.text} ${completed ? styles.done : ''}`}>
           {text}
         </span>
+        {description && <p className={styles.description}>{description}</p>}
         <div className={styles.metaRow}>
           {dueDate && <p className={styles.due}>Срок: {formatDate(dueDate)}</p>}
           <span
@@ -50,13 +52,29 @@ export function TodoItem({
         </div>
       </div>
       <Button
+        className={styles.actionButton}
         onClick={() => {
           onDetails(id);
         }}
+        ariaLabel="Открыть подробности задачи"
       >
-        Подробнее
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
       </Button>
       <Button
+        className={styles.actionButton}
         onClick={() => {
           onEdit(id);
         }}
@@ -78,6 +96,7 @@ export function TodoItem({
         </svg>
       </Button>
       <Button
+        className={styles.actionButton}
         onClick={() => {
           console.log('Удаляем', id);
           onRemove(id);

@@ -6,6 +6,7 @@ interface IButton {
   onClick?: () => void;
   disabled?: boolean;
   ariaLabel?: string;
+  className?: string;
 }
 
 function Button({
@@ -14,11 +15,12 @@ function Button({
   onClick,
   disabled,
   ariaLabel,
+  className,
 }: IButton) {
   return (
     <button
       type={type}
-      className={styles.button}
+      className={`${styles.button} ${className ?? ''}`}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
