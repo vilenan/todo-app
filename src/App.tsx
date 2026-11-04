@@ -395,7 +395,6 @@ function App() {
         </div>
 
         <div className={styles.pageTop}>
-          <h1 className={styles.title}>Мои задачи</h1>
           <div className={styles.topActions}>
             <Button type="button" onClick={openModal}>
               + Добавить задачу
