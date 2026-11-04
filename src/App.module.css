@@ -24,8 +24,10 @@
 }
 
 .container {
+  width: 100%;
   max-width: 800px;
-  padding-top: 24px;
+  margin: 0 auto;
+  padding: 24px 20px 32px;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -193,6 +195,7 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .topActions {
@@ -273,4 +276,25 @@
   color: #1d4ed8;
   font: inherit;
   cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .pageTop {
+    flex-wrap: wrap;
+  }
+
+  .filterButton,
+  .listSelect,
+  .topActions button {
+    min-height: 44px;
+  }
+
+  .resetsWrapper {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .clearButton {
+    width: 100%;
+  }
 }

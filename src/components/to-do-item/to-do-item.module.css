@@ -75,6 +75,7 @@
 
 .text {
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .done {
@@ -177,4 +178,33 @@
 .categoryWork {
   background: #ffedd5;
   color: #9a3412;
+}
+
+@media (max-width: 640px) {
+  .item {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) repeat(3, 44px);
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .checkbox {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+  }
+
+  .content {
+    grid-column: 2 / -1;
+  }
+
+  .actionButton {
+    width: 44px;
+    height: 44px;
+  }
+
+  .actionButton:first-of-type {
+    grid-column: 3;
+  }
 }
