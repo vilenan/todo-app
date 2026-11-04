@@ -59,6 +59,7 @@ npm run dev:backend
 - `POST /auth/signup`
 - `POST /auth/login`
 - `POST /auth/refresh`
+- `POST /auth/verify-email`
 - `POST /auth/logout`
 
 Задачи:
@@ -73,7 +74,9 @@ npm run dev:backend
 
 ## База данных
 
-Prisma schema лежит в `prisma/schema.prisma`.
+Схема SQLite находится в `prisma/schema.prisma`, PostgreSQL — в
+`prisma/postgresql/schema.prisma`. `prisma.config.ts` выбирает схему и
+соответствующие миграции по `DATABASE_URL`.
 
 Сейчас используются модели:
 
@@ -81,7 +84,9 @@ Prisma schema лежит в `prisma/schema.prisma`.
 - `Todo`
 - `RefreshToken`
 
-Для локальной разработки используется SQLite.
+Для локальной разработки используется SQLite; развёрнутый на ONREZA backend
+подключён к отдельной управляемой PostgreSQL. Данные между ними автоматически
+не синхронизируются.
 
 ## Что ожидает frontend
 
@@ -112,7 +117,8 @@ ACCESS_TOKEN_EXPIRES_IN="15m"
 REFRESH_TOKEN_EXPIRES_IN="30d"
 ```
 
-Подтверждение email и Resend пока не входят в реализованный backend-контракт.
+Подтверждение email реализовано через Resend и `POST /auth/verify-email`.
+В демонстрационной среде оно отключено через `EMAIL_VERIFICATION_ENABLED=false`.
 
 Todo routes должны возвращать данные, совместимые с типом задачи во frontend:
 

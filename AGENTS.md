@@ -12,12 +12,34 @@ the code that currently exists and the checks required before changing it.
 - Product domain: a personal todo application with authentication, task CRUD,
   filtering, sorting, statistics, task details, and a profile page
 - Backend lives in the `backend/` directory in this repository
-- Frontend talks to the NestJS API at `http://localhost:3000`
+- Frontend uses `VITE_API_URL` to reach the NestJS API; the local default is
+  `http://localhost:3000`
 - Authentication uses short-lived access JWTs in frontend memory and refresh
   tokens in `HttpOnly` cookies; tokens are not stored in `localStorage`
 - Email verification links are sent through Resend by default; the demo can disable
   email verification via `EMAIL_VERIFICATION_ENABLED=false`
 - The backend uses SQLite (`backend/dev.db`) locally or PostgreSQL through Prisma
+
+## Current Deployment
+
+- ONREZA workspace: `vilena-studio`; GitHub repository `vilenan/todo-app`, branch `main`
+- Frontend project `vilena-todo`: https://vilena-todo-vilena-studio.onreza.app
+- Backend project `vilena-todo-api`: https://vilena-todo-api-vilena-studio.onreza.app
+- Production uses the managed PostgreSQL database `todo_app`; local SQLite and
+  production PostgreSQL are separate databases, not automatically synchronized
+- ONREZA builds the backend from `backend/` with Node.js 24, output `dist`, and
+  `npx prisma migrate deploy && npm run build && npm prune --omit=dev`
+- The demonstration has email verification disabled. Do not commit secrets or
+  database connection strings; configure them in the hosting environment
+- On 2026-11-04, registration, login, task creation and persistence after
+  signing out and back in were checked against the deployed app. Accessibility
+  from Russia without a VPN remains unverified
+- The earlier artifact-publication failure was resolved by ONREZA support; do
+  not assume a future deployment failure has the same cause
+- Prisma selects the schema and migrations using `DATABASE_URL`: SQLite uses
+  `backend/prisma/schema.prisma` and `backend/prisma/migrations/`; PostgreSQL
+  uses `backend/prisma/postgresql/schema.prisma` and its `migrations/` directory.
+  Keep both schemas aligned and generate the client for the selected database
 
 ## Architecture Notes
 
@@ -47,7 +69,7 @@ the code that currently exists and the checks required before changing it.
   - `POST /auth/signup`
   - `POST /auth/login`
   - `POST /auth/refresh`
-- `POST /auth/verify-email`
+  - `POST /auth/verify-email`
   - `POST /auth/logout`
 - Todo endpoints exposed by the backend:
   - `GET /todos`

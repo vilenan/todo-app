@@ -111,4 +111,14 @@ Backend поддерживает SQLite и PostgreSQL. Prisma выбирает �
 принимает порт из `PORT`. Frontend и API должны располагаться на одном сайте
 (например, на поддоменах одного домена), чтобы работала refresh cookie
 `SameSite=Lax`; доступ по HTTPS обязателен. Для React Router на хостинге нужен
-SPA fallback на `index.html`. Эти настройки ещё необходимо проверить в ONREZA.
+SPA fallback на `index.html`.
+
+## Размещение на ONREZA
+
+Демонстрационная версия размещена в workspace `vilena-studio`: [frontend](https://vilena-todo-vilena-studio.onreza.app/)
+и [backend](https://vilena-todo-api-vilena-studio.onreza.app/) — отдельные
+проекты из ветки `main`. Backend подключён к управляемой PostgreSQL `todo_app`;
+локальный файл SQLite и база на ONREZA не синхронизируются автоматически.
+В демоверсии подтверждение email отключено. 4 ноября 2026 года проверены
+регистрация, вход, создание задачи и её сохранение после повторного входа.
+Доступ из России без VPN пока не проверен.
