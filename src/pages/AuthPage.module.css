@@ -40,7 +40,7 @@
 }
 
 .input {
-  min-height: 48px;
+  min-height: var(--control-height);
   border: 1px solid #d5d9e4;
   border-radius: 12px;
   padding: 0 14px;
@@ -56,7 +56,7 @@
 .button {
   border: 0;
   border-radius: 12px;
-  min-height: 52px;
+  min-height: var(--control-height);
   background: #2040d8;
   color: #fff;
   font: inherit;

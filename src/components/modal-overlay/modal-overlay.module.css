@@ -9,3 +9,10 @@
   overflow-y: auto;
   z-index: 20;
 }
+
+@media (max-width: 600px) {
+  .overlay {
+    padding: 0;
+    overflow: hidden;
+  }
+}

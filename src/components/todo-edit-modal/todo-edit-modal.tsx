@@ -1,10 +1,12 @@
 import type { FormEvent, RefObject } from 'react';
+import { confirmDiscard } from '../../lib/todoDraft';
 import { Modal } from '../modal/modal';
 import TodoForm from '../todo-form/todo-form';
 import type { TodoPriority, TodoCategory } from '../../types/ITodo';
 
 type TodoEditModalProps = {
   isOpen: boolean;
+  isDirty: boolean;
   text: string;
   description: string;
   dueDate: string;
@@ -25,6 +27,7 @@ type TodoEditModalProps = {
 
 export default function TodoEditModal({
   isOpen,
+  isDirty,
   text,
   description,
   dueDate,
@@ -45,7 +48,7 @@ export default function TodoEditModal({
   if (!isOpen) return null;
 
   return (
-    <Modal title="Редактирование" onClose={onClose}>
+    <Modal title="Редактирование" onClose={onClose} isDirty={isDirty}>
       <TodoForm
         text={text}
         description={description}
@@ -56,7 +59,9 @@ export default function TodoEditModal({
         isSubmitDisabled={isSubmitDisabled}
         submitLabel="Сохранить"
         onSubmit={onSubmit}
-        onCancel={onClose}
+        onCancel={() => {
+          if (confirmDiscard(isDirty)) onClose();
+        }}
         onTextChange={onTextChange}
         onTextBlur={onTextBlur}
         onDescriptionChange={onDescriptionChange}

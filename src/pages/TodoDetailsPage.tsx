@@ -44,6 +44,7 @@ export function Component() {
   const { todos, removeTodo } = useTodos();
   const {
     isOpen: isEditOpen,
+    isDirty: isEditDirty,
     editingId: currentEditingId,
     text: editText,
     description: editDescription,
@@ -241,6 +242,7 @@ export function Component() {
 
       <TodoEditModal
         isOpen={isEditOpen}
+        isDirty={isEditDirty}
         text={editText}
         description={editDescription}
         dueDate={editDueDate}

@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import type React from 'react';
 import { useTodos } from '../store/todoStore';
 import type { ITodo, TodoPriority, TodoCategory } from '../types/ITodo';
+import { hasDraftChanged, type TodoDraft } from '../lib/todoDraft';
 
 function validateText(value: string) {
   const trimmed = value.trim();
@@ -21,6 +22,7 @@ export function useEditModal() {
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<TodoPriority>('medium');
   const [category, setCategory] = useState<TodoCategory | null>(null);
+  const [original, setOriginal] = useState<TodoDraft | null>(null);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +33,13 @@ export function useEditModal() {
       const todo = todos.find((item: ITodo) => item.id === id);
       if (!todo) return false;
 
+      setOriginal({
+        text: todo.text,
+        description: todo.description ?? '',
+        dueDate: todo.dueDate ?? '',
+        priority: todo.priority ?? 'medium',
+        category: todo.category,
+      });
       setEditingId(id);
       setText(todo.text);
       setDescription(todo.description ?? '');
@@ -100,6 +109,15 @@ export function useEditModal() {
 
   return {
     isOpen,
+    isDirty:
+      original !== null &&
+      hasDraftChanged(original, {
+        text,
+        description,
+        dueDate,
+        priority,
+        category,
+      }),
     editingId,
     text,
     description,

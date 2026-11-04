@@ -43,72 +43,73 @@ function TodoForm({
 }: TodoFormProps) {
   return (
     <form className={styles.form} onSubmit={onSubmit}>
-      <label className={styles.label}>
-        Текст задачи
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Например: оплатить счета"
-          className={`${styles.input} ${error ? styles.inputError : ''}`}
-          value={text}
-          onChange={(e) => onTextChange(e.target.value)}
-          onBlur={onTextBlur}
-        />
-      </label>
+      <div className={styles.fields}>
+        <label className={styles.label}>
+          Текст задачи
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Например: оплатить счета"
+            className={`${styles.input} ${error ? styles.inputError : ''}`}
+            value={text}
+            onChange={(e) => onTextChange(e.target.value)}
+            onBlur={onTextBlur}
+          />
+        </label>
 
-      <label className={styles.label}>
-        Описание
-        <textarea
-          placeholder="Коротко опиши, что нужно сделать"
-          className={styles.textarea}
-          value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
-          rows={3}
-        />
-      </label>
-      <label className={styles.label}>
-        Приоритет
-        <select
-          value={priority}
-          onChange={(e) =>
-            onPriorityChange(e.target.value as 'low' | 'medium' | 'high')
-          }
-        >
-          <option value="low">Низкий</option>
-          <option value="medium">Средний</option>
-          <option value="high">Высокий</option>
-        </select>
-      </label>
+        <label className={styles.label}>
+          Описание
+          <textarea
+            placeholder="Коротко опиши, что нужно сделать"
+            className={styles.textarea}
+            value={description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            rows={3}
+          />
+        </label>
+        <label className={styles.label}>
+          Приоритет
+          <select
+            value={priority}
+            onChange={(e) =>
+              onPriorityChange(e.target.value as 'low' | 'medium' | 'high')
+            }
+          >
+            <option value="low">Низкий</option>
+            <option value="medium">Средний</option>
+            <option value="high">Высокий</option>
+          </select>
+        </label>
 
-      <label className={styles.label}>
-        Категория
-        <select
-          value={category ?? ''}
-          onChange={(e) =>
-            onCategoryChange(
-              e.target.value === '' ? null : (e.target.value as TodoCategory)
-            )
-          }
-        >
-          <option value="">без категории</option>
-          <option value="home">дом</option>
-          <option value="study">учеба</option>
-          <option value="work">работа</option>
-        </select>
-      </label>
+        <label className={styles.label}>
+          Категория
+          <select
+            value={category ?? ''}
+            onChange={(e) =>
+              onCategoryChange(
+                e.target.value === '' ? null : (e.target.value as TodoCategory)
+              )
+            }
+          >
+            <option value="">без категории</option>
+            <option value="home">дом</option>
+            <option value="study">учеба</option>
+            <option value="work">работа</option>
+          </select>
+        </label>
 
-      <label className={styles.label}>
-        Срок выполнения
-        <input
-          type="date"
-          className={styles.input}
-          value={dueDate}
-          onChange={(e) => onDueDateChange(e.target.value)}
-        />
-      </label>
+        <label className={styles.label}>
+          Срок выполнения
+          <input
+            type="date"
+            className={styles.input}
+            value={dueDate}
+            onChange={(e) => onDueDateChange(e.target.value)}
+          />
+        </label>
 
-      {error && <p className={styles.error}>{error}</p>}
-
+        {error && <p className={styles.error}>{error}</p>}
+      </div>
       <div className={styles.actions}>
         <button
           type="button"

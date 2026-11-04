@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useBlocker } from 'react-router-dom';
+import { confirmDiscard } from '../../lib/todoDraft';
 import { ModalOverlay } from '../modal-overlay/modal-overlay';
 import styles from './modal.module.css';
 
@@ -7,13 +9,26 @@ type Props = {
   title: string;
   children: ReactNode;
   onClose: () => void;
+  isDirty?: boolean;
 };
 
-export function Modal({ title, children, onClose }: Props) {
+export function Modal({ title, children, onClose, isDirty = false }: Props) {
+  const requestClose = useCallback(() => {
+    if (!confirmDiscard(isDirty)) return;
+    onClose();
+  }, [isDirty, onClose]);
+  const blocker = useBlocker(({ historyAction }) => historyAction === 'POP');
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      blocker.reset();
+      requestClose();
+    }
+  }, [blocker, requestClose]);
   useEffect(() => {
     function handleEsc(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        onClose();
+        requestClose();
       }
     }
 
@@ -21,12 +36,15 @@ export function Modal({ title, children, onClose }: Props) {
     return () => {
       window.removeEventListener('keydown', handleEsc);
     };
-  }, [onClose]);
+  }, [requestClose]);
 
   return (
-    <ModalOverlay onClose={onClose}>
+    <ModalOverlay onClose={requestClose}>
       <div
         className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         onClick={(event) => event.stopPropagation()}
       >
         <div className={styles.header}>
@@ -34,7 +52,7 @@ export function Modal({ title, children, onClose }: Props) {
           <button
             type="button"
             className={styles.closeButton}
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="Закрыть"
           >
             ×

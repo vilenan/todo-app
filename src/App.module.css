@@ -56,7 +56,7 @@
 .search input {
   box-sizing: border-box;
   width: 100%;
-  min-height: 44px;
+  min-height: var(--control-height);
   padding: 0 14px 0 44px;
   border: 1px solid #c7d2fe;
   border-radius: 12px;
@@ -106,7 +106,7 @@
 }
 
 .filterButton {
-  min-height: 36px;
+  min-height: var(--control-height);
   padding: 0 12px;
   border: 1px solid #4c4cff;
   border-radius: 999px;
@@ -137,7 +137,7 @@
 .clearButton {
   border: 2px solid #e5484d;
   border-radius: 8px;
-  height: 56px;
+  height: var(--control-height);
   padding: 0 18px;
   background: transparent;
   color: #e5484d;
@@ -207,7 +207,7 @@
 }
 
 .topActions button {
-  height: 40px;
+  height: var(--control-height);
   padding: 0 14px;
   font-size: 14px;
 }
@@ -216,7 +216,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: var(--control-height);
   padding: 0 18px;
   border-radius: 12px;
   text-decoration: none;
@@ -257,7 +257,7 @@
   font-weight: 600;
 }
 .listSelect {
-  min-height: 36px;
+  min-height: var(--control-height);
   padding: 0 12px;
   border: 1px solid #c7d2fe;
   border-radius: 8px;
@@ -275,7 +275,7 @@
   .filterButton,
   .listSelect,
   .topActions button {
-    min-height: 44px;
+    min-height: var(--control-height);
   }
 
   .resetsWrapper {

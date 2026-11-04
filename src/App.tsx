@@ -11,6 +11,7 @@ import { useTodos } from './store/todoStore';
 import { useEditModal } from './hooks/useEditModal';
 import { useAuthStore } from './store/authStore';
 import { isOverdue } from './lib/todoDate';
+import { confirmDiscard } from './lib/todoDraft';
 import ProfileMenu from './pages/ProfileMenu';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
   } = useTodos();
   const {
     isOpen: isEditOpen,
+    isDirty: isEditDirty,
     editingId: currentEditingId,
     text: editText,
     description: editDescription,
@@ -534,7 +536,17 @@ function App() {
         </div>
 
         {isModalOpen && (
-          <Modal title="Новая задача" onClose={closeModal}>
+          <Modal
+            title="Новая задача"
+            onClose={closeModal}
+            isDirty={Boolean(
+              text ||
+              description ||
+              dueDate ||
+              priority !== 'medium' ||
+              category
+            )}
+          >
             <TodoForm
               text={text}
               description={description}
@@ -545,7 +557,20 @@ function App() {
               isSubmitDisabled={isSubmitDisabled}
               submitLabel="Добавить"
               onSubmit={handleSubmit}
-              onCancel={closeModal}
+              onCancel={() => {
+                if (
+                  confirmDiscard(
+                    Boolean(
+                      text ||
+                      description ||
+                      dueDate ||
+                      priority !== 'medium' ||
+                      category
+                    )
+                  )
+                )
+                  closeModal();
+              }}
               onPriorityChange={setPriority}
               onCategoryChange={setCategory}
               onTextChange={handleTextChange}
@@ -558,6 +583,7 @@ function App() {
         )}
         <TodoEditModal
           isOpen={isEditOpen}
+          isDirty={isEditDirty}
           text={editText}
           description={editDescription}
           dueDate={editDueDate}
