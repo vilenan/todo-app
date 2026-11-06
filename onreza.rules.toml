@@ -1,0 +1,6 @@
+schema = "EDGE_RULE_SET_V1"
+
+[[rule]]
+id = "spa-fallback"
+when.methods = ["GET", "HEAD"]
+action.rewrite = { target = "/index.html", if_no_file = true }
