@@ -132,7 +132,7 @@ export function Component() {
       <div className={appStyles.container}>
         <p>Задача не найдена</p>
         <Link className={styles.backLink} to="/">
-          Назад к списку
+          ← К списку
         </Link>
       </div>
     );
@@ -142,20 +142,18 @@ export function Component() {
 
   return (
     <div className={appStyles.container}>
-      <h1 className={appStyles.title}>Задача</h1>
+      <Link className={styles.backLink} to="/">
+        ← К списку
+      </Link>
 
       <div className={styles.detailsCard}>
         <div className={styles.header}>
-          <p className={styles.cardTitle}>Карточка задачи</p>
+          <h1 className={styles.cardTitle}>{todo.text}</h1>
           <span
             className={`${styles.statusBadge} ${todo.completed ? styles.statusDone : styles.statusActive}`}
           >
             {todo.completed ? 'Выполнена' : 'Активна'}
           </span>
-        </div>
-        <div className={styles.row}>
-          <h2 className={styles.label}>Текст задачи</h2>
-          <p className={styles.value}>{todo.text}</p>
         </div>
         <div className={styles.row}>
           <h2 className={styles.label}>Описание задачи</h2>
@@ -235,10 +233,6 @@ export function Component() {
           </svg>
         </button>
       </div>
-
-      <Link className={styles.backLink} to="/">
-        Назад к списку
-      </Link>
 
       <TodoEditModal
         isOpen={isEditOpen}
