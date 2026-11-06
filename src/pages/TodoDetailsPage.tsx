@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   Link,
   useNavigate,
@@ -41,7 +47,10 @@ function getDeadlineStatus(dueDate?: string) {
 }
 
 export function Component() {
-  const { todos, removeTodo } = useTodos();
+  const { todos, removeTodo, fetchTodos } = useTodos();
+  const [loadState, setLoadState] = useState<'loading' | 'loaded' | 'error'>(
+    'loading'
+  );
   const {
     isOpen: isEditOpen,
     isDirty: isEditDirty,
@@ -70,6 +79,21 @@ export function Component() {
   const todoId = id;
   const todo = id ? todos.find((item) => item.id === todoId) : undefined;
 
+  useEffect(() => {
+    let active = true;
+    fetchTodos().then(
+      () => {
+        if (active) setLoadState('loaded');
+      },
+      () => {
+        if (active) setLoadState('error');
+      }
+    );
+    return () => {
+      active = false;
+    };
+  }, [fetchTodos]);
+
   useLayoutEffect(() => {
     if (isEditOpen) {
       editInputRef.current?.focus();
@@ -94,6 +118,8 @@ export function Component() {
 
     const editId = editParam;
 
+    if (loadState !== 'loaded') return;
+
     if (!todo || editId !== todo.id) {
       clearEditParam();
       return;
@@ -106,6 +132,7 @@ export function Component() {
     closeEditModal,
     currentEditingId,
     isEditOpen,
+    loadState,
     openEditModal,
     searchParams,
     todo,
@@ -125,6 +152,16 @@ export function Component() {
 
     removeTodo(todo.id);
     navigate('/');
+  }
+
+  if (!todo && loadState !== 'loaded') {
+    return (
+      <div className={appStyles.container} role="status">
+        {loadState === 'loading'
+          ? 'Загружаем задачу...'
+          : 'Не удалось загрузить задачу. Обновите страницу.'}
+      </div>
+    );
   }
 
   if (!todo) {
